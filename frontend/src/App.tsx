@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 import { csv } from 'd3-fetch';
 
@@ -134,6 +134,7 @@ const Terrain: React.FC = () => {
 
   return (
     <Canvas style={{ width: '100vw', height: '100vh' }}>
+      <PerspectiveCamera makeDefault position={[0, 0, 30]} />
       <OrbitControls />
       <ambientLight intensity={0.9} />
       <directionalLight position={[50, 5, 5]} />
