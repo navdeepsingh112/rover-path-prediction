@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { csv } from 'd3-fetch';
 
 const TerrainTile = () => {
-  const [tileData, setTileData] = useState<number[] | null>(null);
+  const [tileData, setTileData] = useState(null);
 
   // useEffect(() => {
   //   const fetchTileData = async () => {
@@ -130,11 +130,11 @@ const TerrainTile = () => {
   );
 };
 
-const Terrain: React.FC = () => {
+const Terrain = () => {
 
   return (
     <Canvas style={{ width: '100vw', height: '100vh' }}>
-      <PerspectiveCamera makeDefault position={[0, 0, 30]} />
+      <PerspectiveCamera makeDefault position={[0, 0, 10]} />
       <OrbitControls />
       <ambientLight intensity={0.9} />
       <directionalLight position={[50, 5, 5]} />
