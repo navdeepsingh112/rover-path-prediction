@@ -4,30 +4,57 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { csv } from 'd3-fetch';
 
-const tileSize = 100;  // Size of each tile
-
-interface TerrainTileProps {
-  tileX: number;
-  tileY: number;
-}
-
-const TerrainTile: React.FC<TerrainTileProps> = ({ tileX, tileY }) => {
+const TerrainTile = () => {
   const [tileData, setTileData] = useState<number[] | null>(null);
 
   useEffect(() => {
     const fetchTileData = async () => {
-      const data = await csv(`../tiles/tile_${tileX}_${tileY}.csv`, d => Object.values(d).map(Number));
-      setTileData(data.flat());
+      const data = await csv(`data.csv`, d => {
+        // Convert each value in the row to a number, replacing empty values with 0
+        return Object.values(d).map(value => {
+          const num = Number(value);
+          return isNaN(num) ? 0 : num;
+        });
+      });
+
+      // Fill in missing values if the row has fewer columns than expected
+      const maxColumns = Math.max(...data.map(row => row.length));
+      const completeData = data.map(row => {
+        while (row.length < maxColumns) {
+          row.push(0);
+        }
+        return row;
+      });
+
+      console.log(completeData);
+      setTileData(completeData);
     };
 
     fetchTileData();
-  }, [tileX, tileY]);
+  }, []);
+  // useEffect(() => {
+  //   // Path to your CSV file
+  //   const csvFilePath = 'data.csv';
 
+  //   // Fetch and parse the CSV file
+  //   csv(csvFilePath)
+  //     .then(data => {
+  //       // Limit the data to the first 500 rows if more exist
+  //       const limitedData = data.slice(0, 500);
+
+  //       // Log the parsed and limited data to the console
+  //       console.log(limitedData);
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching the CSV file:', error);
+  //     });
+  // }, []); 
   const geometry = useMemo(() => {
     if (!tileData) return null;
 
-    const width = tileSize;
-    const height = tileSize;
+    const width = 500;
+    const height = 500;
+
     const geometry = new THREE.PlaneGeometry(1, 1, width - 1, height - 1);
     const vertices = geometry.attributes.position.array;
 
@@ -42,26 +69,20 @@ const TerrainTile: React.FC<TerrainTileProps> = ({ tileX, tileY }) => {
   if (!geometry) return null;
 
   return (
-    <mesh geometry={geometry} position={[tileX * tileSize, tileY * tileSize, 0]}>
+    <mesh geometry={geometry}>
       <meshStandardMaterial color="gray" wireframe />
     </mesh>
   );
 };
 
 const Terrain: React.FC = () => {
-  const numTilesX = 1;  // Adjust according to your data
-  const numTilesY = 1;  // Adjust according to your data
 
   return (
     <Canvas style={{ width: '100vw', height: '100vh' }}>
       <OrbitControls />
       <ambientLight intensity={0.9} />
       <directionalLight position={[50, 5, 5]} />
-      {Array.from({ length: numTilesX }).map((_, tileX) =>
-        Array.from({ length: numTilesY }).map((_, tileY) => (
-          <TerrainTile key={`${tileX}-${tileY}`} tileX={tileX} tileY={tileY} />
-        ))
-      )}
+      <TerrainTile />
     </Canvas>
   );
 };
