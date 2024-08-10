@@ -255,9 +255,11 @@ const Plane = ({ tileData }) => {
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [tileData, setTileData] = useState([[0,0],[0,0]]);
+
   const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
       return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
     };
+
   useEffect(() => {
       const jsonFilePath = 'data.json';
 
@@ -269,7 +271,7 @@ export default function App() {
           return response.json();
         })
         .then(data => {
-          console.log(data,'darta');
+          console.log(data, 'darta');
           const subArray = extractSubArray(data, 500, 700, 500, 700);
           console.log(subArray);
           const heights = subArray.map(row => row.map(cell => cell));
@@ -281,10 +283,10 @@ export default function App() {
           console.error('Error fetching JSON file:', error);
         });
     }, []);
+
   return (
     <Canvas camera={{ position: [0, 20, 0], fov: 90 }} shadows>
       <color attach="background" args={["#94ebd8"]} />
-      {/* <fog attach="fog" args={["#94ebd8", 0, 40]} /> */}
       <OrbitControls enablePan={true} />
       <ambientLight intensity={0.1} />
       <directionalLight intensity={0.1} castShadow />
@@ -303,17 +305,14 @@ export default function App() {
       />
 
       <Physics>
-        {/* <Marble /> */}
-        <ControllableBox />
-        <Plane tileData={tileData}/>
-        {/* {positions.map((position, idx) => (
-          <Box position={position} key={idx} />
-          <
-        ))} */}
-        {/* <Pragyan /> */}
-        <Vehicle position={[10, 50, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
+        {!loading && (
+          <>
+            <Plane tileData={tileData} />
+            <ControllableBox />
+            <Vehicle position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
+          </>
+        )}
       </Physics>
     </Canvas>
   );
 }
-
