@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { MeshPortalMaterial, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
-import { Physics, useBox, useHeightfield } from '@react-three/cannon';
+import { Debug, Physics, useBox, useHeightfield } from '@react-three/cannon';
 
 const TerrainTile = () => {
   const [tileData, setTileData] = useState(null);
@@ -40,8 +40,11 @@ const TerrainTile = () => {
   const [ref] = useHeightfield(() => ({
     args: [heightfieldData, { elementSize: 1 }],
     rotation: [-Math.PI / 2, 0, 0],
-    position: [0, 1.18, 0],  // Adjust position to match the elevation range
+    position: [0,22, 0],
     scale: [20, 20, 20],
+    type: 'Static',
+    collisionFilterGroup: 1, // Enable collision detection for the terrain
+    collisionFilterMask: 1, // Collide with the box
   }), null, [heightfieldData]);  
 
   const geometry = useMemo(() => {
@@ -75,11 +78,10 @@ const TerrainTile = () => {
           geometry={geometry}
           rotation={[-Math.PI / 2, 0, 0]}
           receiveShadow
-          castShadow
           scale={[20, 20, 20]}
         >
-          {/* <meshStandardMaterial color="gray" /> */}
-          <meshPhongMaterial color="gray" />
+          {/* <planeGeometry args={[100,100]} /> */}
+          <meshStandardMaterial color="gray" side={THREE.DoubleSide} wireframe />
         </mesh>
       )}
     </>
@@ -87,10 +89,12 @@ const TerrainTile = () => {
 };
 
 const ControllableBox = () => {
+
   const [ref, api] = useBox(() => ({
-    mass: 3,
-    position: [0, 0, 0],
-    args: [0.5, 0.5, 0.5],
+    mass: 30,
+    position: [10, 24, -10],
+    collisionFilterGroup: 1, // Enable collision detection for the box
+    collisionFilterMask: 1, // Collide with the terrain
   }));
 
   useFrame(() => {
@@ -129,13 +133,15 @@ window.addEventListener('keyup', (e) => {
 const Terrain = () => {
   return (
     <Canvas style={{ width: '100vw', height: '100vh' }}>
-      <PerspectiveCamera makeDefault position={[0, 10, 10]} />
-      <OrbitControls />
+      <PerspectiveCamera fov={300} position={[0,20,-30]}/>
+      <OrbitControls enablePan={true} />
       <ambientLight intensity={0.9} />
       <directionalLight position={[50, 50, 50]} />
-      <Physics>
+      <Physics gravity={[0, -9.81, 0]}>
+        {/* <Debug scale={1.1}> */}
         <TerrainTile />
         <ControllableBox />
+      {/* </Debug> */}
       </Physics>
     </Canvas>
   );
