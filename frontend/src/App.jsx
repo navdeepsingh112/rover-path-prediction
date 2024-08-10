@@ -1,50 +1,110 @@
+// import React, { useEffect, useState, useMemo, useRef } from 'react';
+// import { Canvas, useFrame } from '@react-three/fiber';
+// import { MeshPortalMaterial, OrbitControls, PerspectiveCamera } from '@react-three/drei';
+// import * as THREE from 'three';
+// import { Debug, Physics, useBox, useConvexPolyhedron, useHeightfield } from '@react-three/cannon';
+
+// const TerrainTile2 = ({heights}) => {
+//   const terrainRef = useRef();
+//   const [terrain] = useHeightfield(() => ({
+//     args: [heights, { elementSize: 1 }],
+//     rotation: [-Math.PI / 2, 0, 0],
+//   }), terrainRef,[heights]);
+
+//   return (
+//     <mesh ref={terrainRef} receiveShadow>
+//       <primitive object={terrain} />
+//       <meshStandardMaterial color="green" wireframe/>
+//     </mesh>
+//   );
+// }
+// const RandomTerrain = ({height}) => {
+//   const generateRandomHeights = () => {
+//     const heights = [];
+//     for (let i = 0; i < 100; i++) {
+//       const row = [];
+//       for (let j = 0; j < 100; j++) {
+//         row.push(Math.random() * 10);
+//       }
+//       heights.push(row);
+//     }
+//     console.log(heights);
+//     return heights;
+//   };
+
+//   const randomHeights = useMemo(() =>{
+//     console.log(height);
+//     return height}, []);
+
+//   return (
+//     <TerrainTile2 heights={randomHeights} />
+//   );
+// };
+
+// const Terrain = () => {
+//   const [loading, setLoading] = useState(true);
+//   const [tileData, setTileData] = useState(null);
+
+//   const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
+//     return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
+//   };
+
+//   useEffect(() => {
+//     const jsonFilePath = 'data.json';
+
+//     fetch(jsonFilePath)
+//       .then(response => {
+//         if (!response.ok) {
+//           throw new Error(`HTTP error! Status: ${response.status}`);
+//         }
+//         return response.json();
+//       })
+//       .then(data => {
+//         console.log(data,'darta');
+//         const subArray = extractSubArray(data, 500, 700, 500, 700);
+//         console.log(subArray);
+//         const heights = subArray.map(row => row.map(cell => cell));
+//         console.log(heights);
+//         setTileData(heights);
+//         setLoading(false);
+//       })
+//       .catch(error => {
+//         console.error('Error fetching JSON file:', error);
+//       });
+//   }, []);
+
+//   return (
+//     <Canvas style={{ width: '100vw', height: '100vh' }}>
+//       <PerspectiveCamera fov={300} position={[0,20,-30]}/>
+//       <OrbitControls enablePan={true} />
+//       <ambientLight intensity={0.9} />
+//       <directionalLight position={[50, 50, 50]} />
+//       <Physics gravity={[0, -100, 0]}>
+//         <Debug scale={1.1}>
+//           {/* {!loading && <TerrainTile2 heights={tileData} />} */}
+//           {<RandomTerrain height={tileData} />}
+//           <ControllableBox />
+//         </Debug>
+//       </Physics>
+//     </Canvas>
+//   );
+// };
+
+// export default Terrain;
+
+// import React from "react";
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Physics, useBox, usePlane, useSphere } from "@react-three/cannon";
+import * as THREE from "three";
+import { useHeightfield } from '@react-three/cannon';
 import { MeshPortalMaterial, OrbitControls, PerspectiveCamera } from '@react-three/drei';
-import * as THREE from 'three';
-import { Debug, Physics, useBox, useConvexPolyhedron, useHeightfield } from '@react-three/cannon';
-
-const TerrainTile2 = ({heights}) => {
-  const terrainRef = useRef();
-  const [terrain] = useHeightfield(() => ({
-    args: [heights, { elementSize: 1 }],
-    rotation: [-Math.PI / 2, 0, 0],
-  }), terrainRef,[heights]);
-
-  return (
-    <mesh ref={terrainRef} receiveShadow>
-      <primitive object={terrain} />
-      <meshStandardMaterial color="green" wireframe/>
-    </mesh>
-  );
-}
-const RandomTerrain = ({height}) => {
-  const generateRandomHeights = () => {
-    const heights = [];
-    for (let i = 0; i < 100; i++) {
-      const row = [];
-      for (let j = 0; j < 100; j++) {
-        row.push(Math.random() * 10);
-      }
-      heights.push(row);
-    }
-    console.log(heights);
-    return heights;
-  };
-
-  const randomHeights = useMemo(() =>{
-    console.log(height);
-    return height}, []);
-
-  return (
-    <TerrainTile2 heights={randomHeights} />
-  );
-};
+// import "./styles.css";
 const ControllableBox = () => {
 
   const [ref, api] = useBox(() => ({
     mass: 30,
-    position: [10, 24, -10],
+    position: [10, 50, -10],
     collisionFilterGroup: 1, // Enable collision detection for the box
     collisionFilterMask: 1, // Collide with the terrain
   }));
@@ -84,52 +144,170 @@ window.addEventListener('keyup', (e) => {
   window.pressedKeys[e.key] = false;
 });
 
-const Terrain = () => {
-  const [loading, setLoading] = useState(true);
-  const [tileData, setTileData] = useState(null);
+const positions = [
+  [10, 112, 13],
+  [10, 115, 16],
+  [10, 115, 10],
+  [10, 112, 3],
+  [10, 115, 16],
+  [18, 115, 10]
+];
 
-  const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
-    return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
-  };
-
-  useEffect(() => {
-    const jsonFilePath = 'data.json';
-
-    fetch(jsonFilePath)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        const subArray = extractSubArray(data, 500, 700, 500, 700);
-        console.log(subArray);
-        const heights = subArray.map(row => row.map(cell => cell));
-        console.log(heights);
-        setTileData(heights);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching JSON file:', error);
-      });
-  }, []);
+function Marble() {
+  const [ref] = useSphere(() => ({
+    mass: 10,
+    position: [2, 5, 0]
+  }));
 
   return (
-    <Canvas style={{ width: '100vw', height: '100vh' }}>
-      <PerspectiveCamera fov={300} position={[0,20,-30]}/>
+    <mesh ref={ref} castShadow>
+      <sphereGeometry
+        attach="geometry"
+        args={[1, 32, 32]}
+      ></sphereGeometry>
+      <meshStandardMaterial color="white" />
+    </mesh>
+  );
+}
+
+function Box({ position }) {
+  const [ref] = useBox(() => ({
+    mass: 10,
+    position: position,
+    args: [2, 2, 2]
+  }));
+
+  return (
+    <mesh ref={ref} castShadow>
+      <boxGeometry attach="geometry" args={[2, 2, 2]} />
+      <meshStandardMaterial color="white" />
+    </mesh>
+  );
+}
+const Plane = ({ tileData }) => {
+  const [ref] = useHeightfield(() => ({
+    args: [tileData, { elementSize: 1 }], // elementSize defines the size of each tile in world units
+    rotation: [-Math.PI / 2, 0, 0], // Rotate plane to be horizontal
+    position: [0, 0, 0], // Adjust the position if necessary
+  }));
+
+  const geometry = useMemo(() => {
+    if (!tileData || tileData.length === 0) return null;
+
+    const width = tileData.length;
+    const height = tileData[0].length;
+
+    // Create a new BufferGeometry
+    const geometry = new THREE.BufferGeometry();
+
+    // Calculate the total number of vertices
+    const numVertices = width * height;
+
+    // Create a Float32Array for positions (x, y, z for each vertex)
+    const positions = new Float32Array(numVertices * 3);
+
+    // Fill the positions array with custom points
+    for (let i = 0; i < width; i++) {
+      for (let j = 0; j < height; j++) {
+        const index = i * height + j;
+
+        // Custom x, y, z positions
+        positions[index * 3 + 0] = i; // x
+        positions[index * 3 + 1] = j; // y
+        positions[index * 3 + 2] = tileData[i][j]; // z (height)
+      }
+    }
+
+    // Set the position attribute to the geometry
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    // Optionally, create index for better performance in rendering
+    const indices = [];
+    for (let i = 0; i < width - 1; i++) {
+      for (let j = 0; j < height - 1; j++) {
+        const a = i * height + j;
+        const b = (i + 1) * height + j;
+        const c = (i + 1) * height + (j + 1);
+        const d = i * height + (j + 1);
+
+        // Two triangles forming the square
+        indices.push(a, b, d);
+        indices.push(b, c, d);
+      }
+    }
+    geometry.setIndex(indices);
+
+    // Compute normals for lighting calculations
+    geometry.computeVertexNormals();
+
+    return geometry;
+  }, [tileData]);
+
+  return (
+    <mesh ref={ref} geometry={geometry}>
+      <meshStandardMaterial color="white" side={THREE.DoubleSide} />
+    </mesh>
+  );
+};
+export default function App() {
+  const [loading, setLoading] = useState(true);
+  const [tileData, setTileData] = useState([[0,0],[0,0]]);
+  const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
+      return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
+    };
+  useEffect(() => {
+      const jsonFilePath = 'data.json';
+
+      fetch(jsonFilePath)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data,'darta');
+          const subArray = extractSubArray(data, 500, 700, 500, 700);
+          console.log(subArray);
+          const heights = subArray.map(row => row.map(cell => cell));
+          console.log(heights);
+          setTileData(heights);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error('Error fetching JSON file:', error);
+        });
+    }, []);
+  return (
+    <Canvas camera={{ position: [0, 20, 0], fov: 90 }} shadows>
+      <color attach="background" args={["#94ebd8"]} />
+      {/* <fog attach="fog" args={["#94ebd8", 0, 40]} /> */}
       <OrbitControls enablePan={true} />
-      <ambientLight intensity={0.9} />
-      <directionalLight position={[50, 50, 50]} />
-      <Physics gravity={[0, -100, 0]}>
-        <Debug scale={1.1}>
-          {/* {!loading && <TerrainTile2 heights={tileData} />} */}
-          {!loading && <RandomTerrain height={tileData} />}
-          <ControllableBox />
-        </Debug>
+      <ambientLight intensity={0.1} />
+      <directionalLight intensity={0.1} castShadow />
+      <pointLight
+        castShadow
+        intensity={3}
+        args={[0xff0000, 1, 100]}
+        position={[-1, 3, 1]}
+      />
+      <spotLight
+        castShadow
+        intensity={1}
+        args={["blue", 1, 100]}
+        position={[-1, 4, -1]}
+        penumbra={1}
+      />
+
+      <Physics>
+        {/* <Marble /> */}
+        <ControllableBox />
+        <Plane tileData={tileData}/>
+        {/* {positions.map((position, idx) => (
+          <Box position={position} key={idx} />
+        ))} */}
       </Physics>
     </Canvas>
   );
-};
+}
 
-export default Terrain;
