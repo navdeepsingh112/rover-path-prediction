@@ -99,12 +99,13 @@ import { Physics, useBox, usePlane, useSphere } from "@react-three/cannon";
 import * as THREE from "three";
 import { useHeightfield } from '@react-three/cannon';
 import { MeshPortalMaterial, OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import Pragyan from './models/Pragyan';
 // import "./styles.css";
 const ControllableBox = () => {
 
   const [ref, api] = useBox(() => ({
     mass: 30,
-    position: [10, 50, -10],
+    position: [10, -50, -10],
     collisionFilterGroup: 1, // Enable collision detection for the box
     collisionFilterMask: 1, // Collide with the terrain
   }));
@@ -131,18 +132,18 @@ const ControllableBox = () => {
   );
 };
 
-window.isKeyPressed = (key) => {
-  if (!window.pressedKeys) window.pressedKeys = {};
-  return window.pressedKeys[key] || false;
-};
+// window.isKeyPressed = (key) => {
+//   if (!window.pressedKeys) window.pressedKeys = {};
+//   return window.pressedKeys[key] || false;
+// };
 
-window.addEventListener('keydown', (e) => {
-  window.pressedKeys[e.key] = true;
-});
+// window.addEventListener('keydown', (e) => {
+//   window.pressedKeys[e.key] = true;
+// });
 
-window.addEventListener('keyup', (e) => {
-  window.pressedKeys[e.key] = false;
-});
+// window.addEventListener('keyup', (e) => {
+//   window.pressedKeys[e.key] = false;
+// });
 
 const positions = [
   [10, 112, 13],
@@ -244,7 +245,7 @@ const Plane = ({ tileData }) => {
   }, [tileData]);
 
   return (
-    <mesh ref={ref} geometry={geometry}>
+    <mesh ref={ref} geometry={geometry} castShadow receiveShadow>
       <meshStandardMaterial color="white" side={THREE.DoubleSide} />
     </mesh>
   );
@@ -279,33 +280,34 @@ export default function App() {
         });
     }, []);
   return (
-    <Canvas camera={{ position: [0, 20, 0], fov: 90 }} shadows>
-      <color attach="background" args={["#94ebd8"]} />
+    <Canvas >
       {/* <fog attach="fog" args={["#94ebd8", 0, 40]} /> */}
       <OrbitControls enablePan={true} />
-      <ambientLight intensity={0.1} />
-      <directionalLight intensity={0.1} castShadow />
-      <pointLight
+      <ambientLight intensity={0.6} />
+      {/* <directionalLight intensity={5}  /> */}
+      {/* <pointLight
         castShadow
         intensity={3}
-        args={[0xff0000, 1, 100]}
+        args={[0xffffff, 1, 100]}
         position={[-1, 3, 1]}
       />
       <spotLight
         castShadow
         intensity={1}
-        args={["blue", 1, 100]}
+        args={["white", 1, 100]}
         position={[-1, 4, -1]}
         penumbra={1}
-      />
+      /> */}
+      <PerspectiveCamera fov={300} position={[0,20,-30]}/>
 
       <Physics>
         {/* <Marble /> */}
-        <ControllableBox />
+        {/* <ControllableBox /> */}
         <Plane tileData={tileData}/>
         {/* {positions.map((position, idx) => (
           <Box position={position} key={idx} />
         ))} */}
+        <Pragyan/>
       </Physics>
     </Canvas>
   );
