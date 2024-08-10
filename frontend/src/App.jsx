@@ -286,23 +286,10 @@ export default function App() {
 
   return (
     <Canvas camera={{ position: [0, 20, 0], fov: 90 }} shadows>
-      <color attach="background" args={["#94ebd8"]} />
+      {/* <color attach="background" args={["#94ebd8"]} /> */}
       <OrbitControls enablePan={true} />
       <ambientLight intensity={0.1} />
-      <directionalLight intensity={0.1} castShadow />
-      <pointLight
-        castShadow
-        intensity={3}
-        args={[0xff0000, 1, 100]}
-        position={[-1, 3, 1]}
-      />
-      <spotLight
-        castShadow
-        intensity={1}
-        args={["blue", 1, 100]}
-        position={[-1, 4, -1]}
-        penumbra={1}
-      />
+      <directionalLight position={[50, 5, 5]} />
 
       <Physics>
         {!loading && (
