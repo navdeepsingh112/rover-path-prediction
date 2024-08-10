@@ -99,6 +99,8 @@ import { Physics, useBox, usePlane, useSphere } from "@react-three/cannon";
 import * as THREE from "three";
 import { useHeightfield } from '@react-three/cannon';
 import { MeshPortalMaterial, OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import Pragyan from './models/Pragyan';
+import Vehicle from './Vehicle'
 // import "./styles.css";
 const ControllableBox = () => {
 
@@ -125,7 +127,7 @@ const ControllableBox = () => {
 
   return (
     <mesh ref={ref} castShadow receiveShadow>
-      <boxGeometry args={[0.5, 0.5, 0.5]} />
+     
       <meshStandardMaterial color="blue" />
     </mesh>
   );
@@ -245,6 +247,7 @@ const Plane = ({ tileData }) => {
 
   return (
     <mesh ref={ref} geometry={geometry}>
+      {/* <Vehicle position={[10, 50, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} /> */}
       <meshStandardMaterial color="white" side={THREE.DoubleSide} />
     </mesh> 
   );
@@ -305,7 +308,10 @@ export default function App() {
         <Plane tileData={tileData}/>
         {/* {positions.map((position, idx) => (
           <Box position={position} key={idx} />
+          <
         ))} */}
+        {/* <Pragyan /> */}
+        <Vehicle position={[10, 50, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
       </Physics>
     </Canvas>
   );
