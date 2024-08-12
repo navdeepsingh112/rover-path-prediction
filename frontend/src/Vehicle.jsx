@@ -26,7 +26,8 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
         chassisConnectionPointLocal: [1, 0, 1],
         useCustomSlidingRotationalSpeed: true,
         customSlidingRotationalSpeed: -30,
-        frictionSlip: 2
+        frictionSlip: 2,
+        rotation:  [0, Math.PI / 2, 0],
     }
 
     const wheelInfo1 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [-width / 2, height, front] }
@@ -60,7 +61,7 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
         <group ref={vehicle} position={[0, -0.4, 0]}>
             <Beetle ref={chassis} rotation={props.rotation} position={props.position} angularVelocity={props.angularVelocity} />
             <Wheel ref={wheel1} radius={radius} leftSide />
-            <Wheel ref={wheel2} radius={radius} />
+            <Wheel ref={wheel2} radius={radius} rotation={[0, Math.PI / 2, 0]} />
             <Wheel ref={wheel3} radius={radius} leftSide />
             <Wheel ref={wheel4} radius={radius} />
         </group>
