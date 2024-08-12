@@ -287,7 +287,7 @@ export default function App() {
   return (
     <Canvas  shadows>
       {/* <color attach="background" args={["#94ebd8"]} /> */}
-      <OrbitControls enablePan={true} />
+      {/* <OrbitControls enablePan={true} /> */}
       <ambientLight intensity={0.1} />
       <directionalLight position={[50, 5, 5]} />
 
