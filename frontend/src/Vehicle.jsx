@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useRaycastVehicle } from '@react-three/cannon'
-import  useControls  from './utils/useControls'
+import useControls from './utils/useControls'
 import Beetle from './Beetle'
 import Wheel from './Wheel'
 
@@ -57,7 +57,7 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
     })
 
     return (
-        <group ref={vehicle} position={[0, -0.4, 0]}>
+        <group ref={vehicle} position={[0, -0.4, 0]} castShadow>
             <Beetle ref={chassis} rotation={props.rotation} position={props.position} angularVelocity={props.angularVelocity} />
             <Wheel ref={wheel1} radius={radius} leftSide />
             <Wheel ref={wheel2} radius={radius} />
