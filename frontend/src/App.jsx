@@ -101,6 +101,7 @@ import { useHeightfield } from '@react-three/cannon';
 import { MeshPortalMaterial, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Pragyan from './models/Pragyan';
 import Vehicle from './Vehicle'
+// import InclinationDisplay from './utils/inclination';
 // import "./styles.css";
 const ControllableBox = () => {
 
@@ -139,11 +140,13 @@ window.isKeyPressed = (key) => {
 };
 
 window.addEventListener('keydown', (e) => {
-  window.pressedKeys[e.key] = true;
-});
+  if(e.key!='v')
+{  window.pressedKeys[e.key] = true;
+}});
 
 window.addEventListener('keyup', (e) => {
-  window.pressedKeys[e.key] = false;
+if(e.key!='v'){
+  window.pressedKeys[e.key] = false;}
 });
 
 const positions = [
@@ -252,14 +255,13 @@ const Plane = ({ tileData }) => {
     </mesh> 
   );
 };
-export default function App() {
+export default function TerrainMain() {
   const [loading, setLoading] = useState(true);
   const [tileData, setTileData] = useState([[0,0],[0,0]]);
-
+  const [hover,setHover] = useState(false);
   const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
       return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
     };
-
   useEffect(() => {
       const jsonFilePath = 'data.json';
 
@@ -283,21 +285,35 @@ export default function App() {
           console.error('Error fetching JSON file:', error);
         });
     }, []);
-  const vehicleRef = useRef();
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+        if (event.key === 'h') {
+            setHover(!hover);
+        }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup the event listener
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+}, [hover]);
   return (
-    <Canvas  shadows>
+    <>
+    <Canvas  shadows >
       {/* <color attach="background" args={["#94ebd8"]} /> */}
       {/* <OrbitControls enablePan={true} /> */}
       <ambientLight intensity={0.1} />
       <directionalLight position={[50, 5, 5]} />
 
-      <Physics>
+      <Physics gravity={[0,!hover?-9.81:-5.5,0]}>
         {!loading && (
           <>
             <Plane tileData={tileData} />/
             {/* <ControllableBox /> */}
             {/* <PerspectiveCamera makeDefault position={[10, 50, 40]} /> */}
-            <Vehicle ref={vehicleRef} position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
+            <Vehicle  position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
             {/* <FollowCamera vehicleRef={vehicleRef} /> */}
             {/* <ControllableBox /> */}
             {/* <Vehicle position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} /> */}
@@ -305,29 +321,31 @@ export default function App() {
         )}
       </Physics>
     </Canvas>
+    {/* <InclinationDisplay/> */}
+    </>
   );
 }
-const FollowCamera = ({ vehicleRef }) => {
-  const cameraRef = useRef();
+// const FollowCamera = ({ vehicleRef }) => {
+//   const cameraRef = useRef();
 
-  useFrame(() => {
-    if (cameraRef.current && vehicleRef.current) {
-      // Access vehicle's position
-      const vehiclePosition = vehicleRef.current.position;
-      const vehicleRotation = vehicleRef.current.rotation;
+//   useFrame(() => {
+//     if (cameraRef.current && vehicleRef.current) {
+//       // Access vehicle's position
+//       const vehiclePosition = vehicleRef.current.position;
+//       const vehicleRotation = vehicleRef.current.rotation;
 
-      // Calculate camera position based on vehicle's position and rotation
-      const offset = [0, 5, -10]; // Adjust as needed
-      const cameraPosition = [ 
-        vehiclePosition.x + offset[2] * Math.sin(vehicleRotation.y),
-        vehiclePosition.y + offset[1],
-        vehiclePosition.z + offset[2] * Math.cos(vehicleRotation.y),
-      ];
+//       // Calculate camera position based on vehicle's position and rotation
+//       const offset = [0, 5, -10]; // Adjust as needed
+//       const cameraPosition = [ 
+//         vehiclePosition.x + offset[2] * Math.sin(vehicleRotation.y),
+//         vehiclePosition.y + offset[1],
+//         vehiclePosition.z + offset[2] * Math.cos(vehicleRotation.y),
+//       ];
 
-      cameraRef.current.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
-      cameraRef.current.lookAt(vehiclePosition);
-    }
-  });
+//       cameraRef.current.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+//       cameraRef.current.lookAt(vehiclePosition);
+//     }
+//   });
 
-  return <perspectiveCamera makeDefault ref={cameraRef} position={[0, 30, 10]} />;
-};
+//   return <perspectiveCamera makeDefault ref={cameraRef} position={[0, 30, 10]} />;
+// };
