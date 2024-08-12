@@ -246,9 +246,9 @@ const Plane = ({ tileData }) => {
   }, [tileData]);
 
   return (
-    <mesh ref={ref} geometry={geometry}>
+    <mesh ref={ref} geometry={geometry} receiveShadow>
       {/* <Vehicle position={[10, 50, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} /> */}
-      <meshStandardMaterial color="white" side={THREE.DoubleSide} />
+      <meshLambertMaterial attach="material" color="white" />
     </mesh> 
   );
 };
@@ -294,11 +294,13 @@ export default function App() {
       <Physics>
         {!loading && (
           <>
-            <Plane tileData={tileData} />
+            <Plane tileData={tileData} />/
             {/* <ControllableBox /> */}
             {/* <PerspectiveCamera makeDefault position={[10, 50, 40]} /> */}
-            <Vehicle ref={vehicleRef}  position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
+            <Vehicle ref={vehicleRef} position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
             {/* <FollowCamera vehicleRef={vehicleRef} /> */}
+            {/* <ControllableBox /> */}
+            {/* <Vehicle position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} /> */}
           </>
         )}
       </Physics>

@@ -1,6 +1,7 @@
 import { forwardRef } from 'react'
 import { useGLTF } from '@react-three/drei'
-import { useCylinder } from '@react-three/cannon'
+import { useCylinder, useSphere } from '@react-three/cannon'
+// import * as CANNON from 'cannon-es'
 
 // useGLTF.preload('/Wheel.glb')
 
@@ -18,19 +19,21 @@ import { useCylinder } from '@react-three/cannon'
 //         </mesh>
 //     )
 // })
-import { Cylinder } from '@react-three/drei';
-import { MeshStandardMaterial } from 'three';
+// import { Cylinder } from '@react-three/drei';
+// import { MeshStandardMaterial } from 'three';
 
 const Wheel = forwardRef(({ radius = 0.7, leftSide, ...props }, ref) => {
-    const gltf = useGLTF('/tyre/tyre.gltf');
     // Set up the physics for the cylinder
-    const [, api] = useCylinder(() => ({
+    const gltf = useGLTF('/tyre/tyre.gltf');
+    const [, api] = useSphere(() => ({
+    // const [, api] = useCylinder(() => ({
         mass: 1,
         type: 'Kinematic',
         material: 'wheel',
         collisionFilterGroup: 0,
         rotation: [0, Math.PI / 2, 0],
-        args: [radius, radius, 0.1, 16], // [topRadius, bottomRadius, height, radialSegments]
+        args: [radius],
+        // args: [radius, radius, 0.5, 16], // [topRadius, bottomRadius, height, radialSegments]
         ...props
     }), ref);
 
@@ -38,11 +41,20 @@ const Wheel = forwardRef(({ radius = 0.7, leftSide, ...props }, ref) => {
     const rotationAngle = (leftSide ? 1 : -1) * Math.PI / 2;
 
     return (
-        <Cylinder ref={ref} args={[radius, radius, 0.1, 16]} rotation={[0, Math.PI / 2, 0]} castShadow>
-            <primitive object={gltf.scene} rotation={[0, Math.PI / 2, 0]} />
-            {/* <meshStandardMaterial attach="material" color="gray" />
+                // <mesh ref={ref} rotation={[0, 0, rotationAngle]} castShadow>
+            {/* <sphereGeometry args={[radius, 16, 16]}/> */}
+            {/* <meshStandardMaterial attach="material" color="yellow" transparent opacity={0}/> */}
+            {/* <meshStandardMaterial attach="material" color="black" /> */}
+        {/* </mesh> */}
+        // <Cylinder ref={ref} args={[radius, radius, 0.5, 16]} rotation={[0, 0, rotationAngle]} castShadow>
+            // <meshStandardMaterial attach="material" color="gray" />
+            // <meshStandardMaterial attach="material" color="black" />
+        // </Cylinder>
+            // <Cylinder ref={ref} args={[radius, radius, 0.1, 16]} rotation={[0, Math.PI / 2, 0]} castShadow>
+                {/* <primitive object={gltf.scene} rotation={[0, Math.PI / 2, 0]} /> */}
+                {/* <meshStandardMaterial attach="material" color="gray" />
             <meshStandardMaterial attach="material" color="black" /> */}
-        </Cylinder>
+            {/* </Cylinder> */}
     );
 });
 
