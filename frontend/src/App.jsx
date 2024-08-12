@@ -101,6 +101,69 @@ import { useHeightfield } from '@react-three/cannon';
 import { MeshPortalMaterial, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Pragyan from './models/Pragyan';
 import Vehicle from './Vehicle'
+
+
+const Marker = ({ position }) => {
+  const markerRef = useRef();
+  const pulseRef = useRef(0);
+
+  useFrame((state, delta) => {
+    if (markerRef.current) {
+      // Pulsating size
+      pulseRef.current += delta * 2; // Adjust the multiplier to change pulsation speed
+      const scale = 1 + Math.sin(pulseRef.current) * 0.2; // Adjust the multiplier to change pulsation intensity
+      markerRef.current.scale.set(scale, scale, scale);
+
+      // Pulsating glow
+      const emissiveIntensity = 0.5 + Math.sin(pulseRef.current) * 0.3; // Adjust these values to change glow intensity
+      markerRef.current.material.emissiveIntensity = emissiveIntensity;
+    }
+  });
+
+  return (
+    <mesh ref={markerRef} position={position}>
+      <sphereGeometry args={[0.5, 32, 32]} />
+      <meshStandardMaterial 
+        color="white" 
+        emissive="white" 
+        emissiveIntensity={0.5} 
+        toneMapped={false} // This helps with the glow effect
+      />
+    </mesh>
+  );
+};
+
+import { Sphere } from '@react-three/drei';
+
+const GlowingSphere = ({ position }) => {
+  return (
+    <Sphere args={[0.6, 32, 32]} position={position}>
+      <meshBasicMaterial color="white" transparent opacity={0.2} />
+    </Sphere>
+  );
+};
+
+
+const ConnectingLines = ({ points }) => {
+  const lineGeometry = useMemo(() => {
+    const geometry = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(...p)));
+    return geometry;
+  }, [points]);
+
+  return (
+    <line geometry={lineGeometry}>
+      <lineBasicMaterial attach="material" color="white" linewidth={2} />
+    </line>
+  );
+};
+
+const predefinedPoints = [
+  [1, 29.3, -2.5],
+  [3.7, 29, -8],
+  [6.9, 29, -5 ]
+];
+
+
 // import "./styles.css";
 const ControllableBox = () => {
 
@@ -285,7 +348,7 @@ export default function App() {
     }, []);
 
   return (
-    <Canvas camera={{ position: [0, 20, 0], fov: 90 }} shadows>
+    <Canvas camera={{ position: [-50, 100, 50], fov: 90 }} shadows>
       {/* <color attach="background" args={["#94ebd8"]} /> */}
       <OrbitControls enablePan={true} />
       <ambientLight intensity={0.1} />
@@ -296,7 +359,21 @@ export default function App() {
           <>
             <Plane tileData={tileData} />
             <ControllableBox />
-            <Vehicle position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
+            <Vehicle position={[10, 100, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
+            {/* {predefinedPoints.map((point, index) => (
+              <Marker key={index} position={point} />
+            ))} */}
+
+            {predefinedPoints.map((point, index) => (
+              <group key={index}>
+                <Marker position={point} />
+                <GlowingSphere position={point} />
+              </group>
+            ))}
+
+            
+            {/* Add connecting lines */}
+            <ConnectingLines points={predefinedPoints} />
           </>
         )}
       </Physics>

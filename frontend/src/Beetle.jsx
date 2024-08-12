@@ -40,7 +40,7 @@ const Beetle = forwardRef(({ args = [1.7, 1, 4], mass = 500, ...props }, ref) =>
 
     return (
         <Box ref={ref} args={args} castShadow>
-            <meshStandardMaterial attach="material" color="black" />
+            <meshStandardMaterial attach="material" color="yellow" />
         </Box>
     );
 });

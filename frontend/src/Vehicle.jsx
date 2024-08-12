@@ -4,14 +4,18 @@ import { useRaycastVehicle } from '@react-three/cannon'
 import  useControls  from './utils/useControls'
 import Beetle from './Beetle'
 import Wheel from './Wheel'
+import { Vector3 } from 'three'
 
+// Sample array of positions, staying within the bounds of your terrain
+
+  
 function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back = -1.15, steer = 0.75, force = 2000, maxBrake = 1e5, ...props }) {
-    const chassis = useRef()
-    const wheel1 = useRef()
-    const wheel2 = useRef()
-    const wheel3 = useRef()
-    const wheel4 = useRef()
-    const controls = useControls()
+    const chassis = useRef();
+    const wheel1 = useRef();
+    const wheel2 = useRef();
+    const wheel3 = useRef();
+    const wheel4 = useRef();
+    const controls = useControls();
 
     const wheelInfo = {
         radius,
@@ -27,12 +31,12 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
         useCustomSlidingRotationalSpeed: true,
         customSlidingRotationalSpeed: -30,
         frictionSlip: 2
-    }
+    };
 
-    const wheelInfo1 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [-width / 2, height, front] }
-    const wheelInfo2 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [width / 2, height, front] }
-    const wheelInfo3 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [-width / 2, height, back] }
-    const wheelInfo4 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [width / 2, height, back] }
+    const wheelInfo1 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [-width / 2, height, front] };
+    const wheelInfo2 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [width / 2, height, front] };
+    const wheelInfo3 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [-width / 2, height, back] };
+    const wheelInfo4 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [width / 2, height, back] };
 
     const [vehicle, api] = useRaycastVehicle(() => ({
         chassisBody: chassis,
@@ -41,20 +45,52 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
         indexForwardAxis: 2,
         indexRightAxis: 0,
         indexUpAxis: 1
-    }))
+    }));
 
+    
+    let positions = [
+        [0.5, 0, 0.5],
+        [0.7, 0, 0.6],
+        [0.9, 0, 1 ]
+      ];
     useFrame(() => {
-        const { forward, backward, left, right, brake, reset } = controls.current
-        for (let e = 2; e < 4; e++) api.applyEngineForce(forward || backward ? force * (forward && !backward ? -1 : 1) : 0, 2)
-        for (let s = 0; s < 2; s++) api.setSteeringValue(left || right ? steer * (left && !right ? 1 : -1) : 0, s)
-        for (let b = 2; b < 4; b++) api.setBrake(brake ? maxBrake : 0, b)
-        if (reset) {
-            chassis.current.api.position.set(0, 0.5, 0)
-            chassis.current.api.velocity.set(0, 0, 0)
-            chassis.current.api.angularVelocity.set(0, 0.5, 0)
-            chassis.current.api.rotation.set(0, -Math.PI / 4, 0)
+        const { forward, backward, left, right, brake, reset, next, prev, currentPosition } = controls.current;
+
+        if (next || prev) {
+
+            console.log('currentPosition', currentPosition);
+            if(next){
+            const v1 = positions[currentPosition];
+            const v2 = positions[currentPosition - 1];
+            vehicle.current.translateOnAxis(new Vector3(v1[0]-v2[0] ,v1[1]-v2[1],v1[2]-v2[2] ), 1);
+            }
+
+            if(prev){
+                const v1 = positions[currentPosition];
+                const v2 = positions[currentPosition + 1];
+                vehicle.current.translateOnAxis(new Vector3(v1[0]-v2[0] / Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[1]-v2[1]), 2)+Math.pow((v1[2]-v2[2]), 2)) 
+                ,(v1[1]-v2[1]) / Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[1]-v2[1]), 2)+Math.pow((v1[2]-v2[2]), 2)),
+                (v1[2]-v2[2])/Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[1]-v2[1]), 2)+Math.pow((v1[2]-v2[2]), 2))), Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[1]-v2[1]), 2)+Math.pow((v1[2]-v2[2]), 2)));
+            }
+
+            // chassis.current.api.position.set(x, y, z);
+            // chassis.current.api.velocity.set(0, 0, 0);
+            // chassis.current.api.angularVelocity.set(0, 0, 0);
+            // chassis.current.api.rotation.set(0, -Math.PI / 4, 0);
+        } else {
+            for (let e = 2; e < 4; e++) api.applyEngineForce(forward || backward ? force * (forward && !backward ? -1 : 1) : 0, 2);
+            for (let s = 0; s < 2; s++) api.setSteeringValue(left || right ? steer * (left && !right ? 1 : -1) : 0, s);
+            for (let b = 2; b < 4; b++) api.setBrake(brake ? maxBrake : 0, b);
+            if (reset) {
+                // vehicle.current.position.set(0, -0.5, 0);
+
+                // vehicle.current.position.transformDirection(0, -0.5, 0);
+                
+                vehicle.current.translateOnAxis(new Vector3(0.5, 0, -0.5), 1);
+                // vehicle.current.rotation.set(0, -Math.PI / 4, 0);
+            }
         }
-    })
+    });
 
     return (
         <group ref={vehicle} position={[0, -0.4, 0]}>
@@ -64,7 +100,7 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
             <Wheel ref={wheel3} radius={radius} leftSide />
             <Wheel ref={wheel4} radius={radius} />
         </group>
-    )
+    );
 }
 
-export default Vehicle
+export default Vehicle;
