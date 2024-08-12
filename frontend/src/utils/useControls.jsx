@@ -13,7 +13,7 @@ function useKeyPress(target, event) {
 }
 
 export default function useControls() {
-    const keys = useRef({ forward: false, backward: false, left: false, right: false, brake: false, reset: false })
+    const keys = useRef({ forward: false, backward: false, left: false, right: false, brake: false, reset: false , camera: false })
     useKeyPress(['ArrowUp', 'w'], (pressed) => (keys.current.forward = pressed))
     useKeyPress(['ArrowDown', 's'], (pressed) => (keys.current.backward = pressed))
     useKeyPress(['ArrowLeft', 'a'], (pressed) => (keys.current.left = pressed))

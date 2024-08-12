@@ -139,11 +139,13 @@ window.isKeyPressed = (key) => {
 };
 
 window.addEventListener('keydown', (e) => {
-  window.pressedKeys[e.key] = true;
-});
+  if(e.key!='v')
+{  window.pressedKeys[e.key] = true;
+}});
 
 window.addEventListener('keyup', (e) => {
-  window.pressedKeys[e.key] = false;
+if(e.key!='v'){
+  window.pressedKeys[e.key] = false;}
 });
 
 const positions = [
@@ -297,7 +299,7 @@ export default function App() {
             <Plane tileData={tileData} />/
             {/* <ControllableBox /> */}
             {/* <PerspectiveCamera makeDefault position={[10, 50, 40]} /> */}
-            <Vehicle ref={vehicleRef} position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
+            <Vehicle  position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
             {/* <FollowCamera vehicleRef={vehicleRef} /> */}
             {/* <ControllableBox /> */}
             {/* <Vehicle position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} /> */}
@@ -307,27 +309,27 @@ export default function App() {
     </Canvas>
   );
 }
-const FollowCamera = ({ vehicleRef }) => {
-  const cameraRef = useRef();
+// const FollowCamera = ({ vehicleRef }) => {
+//   const cameraRef = useRef();
 
-  useFrame(() => {
-    if (cameraRef.current && vehicleRef.current) {
-      // Access vehicle's position
-      const vehiclePosition = vehicleRef.current.position;
-      const vehicleRotation = vehicleRef.current.rotation;
+//   useFrame(() => {
+//     if (cameraRef.current && vehicleRef.current) {
+//       // Access vehicle's position
+//       const vehiclePosition = vehicleRef.current.position;
+//       const vehicleRotation = vehicleRef.current.rotation;
 
-      // Calculate camera position based on vehicle's position and rotation
-      const offset = [0, 5, -10]; // Adjust as needed
-      const cameraPosition = [ 
-        vehiclePosition.x + offset[2] * Math.sin(vehicleRotation.y),
-        vehiclePosition.y + offset[1],
-        vehiclePosition.z + offset[2] * Math.cos(vehicleRotation.y),
-      ];
+//       // Calculate camera position based on vehicle's position and rotation
+//       const offset = [0, 5, -10]; // Adjust as needed
+//       const cameraPosition = [ 
+//         vehiclePosition.x + offset[2] * Math.sin(vehicleRotation.y),
+//         vehiclePosition.y + offset[1],
+//         vehiclePosition.z + offset[2] * Math.cos(vehicleRotation.y),
+//       ];
 
-      cameraRef.current.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
-      cameraRef.current.lookAt(vehiclePosition);
-    }
-  });
+//       cameraRef.current.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+//       cameraRef.current.lookAt(vehiclePosition);
+//     }
+//   });
 
-  return <perspectiveCamera makeDefault ref={cameraRef} position={[0, 30, 10]} />;
-};
+//   return <perspectiveCamera makeDefault ref={cameraRef} position={[0, 30, 10]} />;
+// };
