@@ -41,8 +41,8 @@ const Beetle = forwardRef(({ args = [1.7, 1, 4], mass = 500, ...props }, ref) =>
     const gltf = useGLTF('/rover3/rover.gltf');
     return (
         <Box ref={ref} args={[0,0,0]} castShadow>
-            <primitive object={gltf.scene} />
-            <PerspectiveCamera makeDefault position={[0, 0, 30]} />
+            <primitive object={gltf.scene} rotation={[0,-Math.PI/2,0]}/>
+            <PerspectiveCamera makeDefault position={[0, 0, -30]} />
             <meshStandardMaterial attach="material" color="black" />
         </Box>
         // <primitive

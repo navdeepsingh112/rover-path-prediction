@@ -5,8 +5,10 @@ import useControls from './utils/useControls'
 import Beetle from './Beetle'
 import Wheel from './Wheel'
 
-function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back = -1.15, steer = 0.75, force = 2000, maxBrake = 1e5, ...props }) {
-    const chassis = useRef()
+// function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back = -1.15, steer = 0.75, force = 2000, maxBrake = 1e5, ...props }) {
+function Vehicle({ radius = 1.2, width = 1.2, height = -0.04, front = 1.3, back = -1.15, steer = 0.75, force = 2000, maxBrake = 1e5, ...props }) {
+
+const chassis = useRef()
     const wheel1 = useRef()
     const wheel2 = useRef()
     const wheel3 = useRef()
@@ -23,17 +25,17 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
         dampingRelaxation: 10,
         dampingCompression: 4.4,
         axleLocal: [-1, 0, 0],
-        chassisConnectionPointLocal: [1, 0, 1],
+        chassisConnectionPointLocal: [1, 1, 1],
         useCustomSlidingRotationalSpeed: true,
         customSlidingRotationalSpeed: -30,
         frictionSlip: 2,
         rotation:  [0, Math.PI / 2, 0],
     }
 
-    const wheelInfo1 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [-width / 2, height, front] }
-    const wheelInfo2 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [width / 2, height, front] }
-    const wheelInfo3 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [-width / 2, height, back] }
-    const wheelInfo4 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [width / 2, height, back] }
+    const wheelInfo1 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [-width / 2 - 0.2, height+0.7, front-0.3] }
+    const wheelInfo2 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [width / 2 + 0.2, height+0.7, front-0.4] }
+    const wheelInfo3 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [-width / 2 - 0.2, height+0.7, back] }
+    const wheelInfo4 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [width / 2+ 0.2, height+0.7, back] }
 
     const [vehicle, api] = useRaycastVehicle(() => ({
         chassisBody: chassis,
