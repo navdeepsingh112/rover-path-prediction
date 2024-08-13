@@ -38,7 +38,7 @@ const Wheel = forwardRef(({ radius = 0.7, leftSide, ...props }, ref) => {
         // args: [radius, radius, 0.5, 16], // [topRadius, bottomRadius, height, radialSegments]
         ...props
     }), ref);
-
+    console.log(materials.Wheels,'necessary');
     // Calculate rotation for the wheel
     const rotationAngle = (leftSide ? 1 : -1) * Math.PI / 2;
 
