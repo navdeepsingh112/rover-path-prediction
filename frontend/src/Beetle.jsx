@@ -43,7 +43,9 @@ const Beetle = forwardRef(({ args = [1.7, 1, 4], mass = 500, ...props }, ref) =>
     // const controls = useControls();
     const [i , si] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [, api] = useBox(() => ({ mass, args, allowSleep: false, onCollide: (e) => console.log('bonk', e.body.userData), ...props }), ref);
+    const [, api] = useBox(() => ({ mass, args, allowSleep: false, 
+        // onCollide: (e) => console.log('bonk', e.body.userData),
+         ...props }), ref);
     const gltf = useGLTF('/rover3/rover.gltf');
     const pos = [[[0, 1, -10], [0, Math.PI, 0]], [[0, 2, 0], [0, Math.PI, 0]], [[0, 5, -10], [Math.PI * 1 / 6, Math.PI, 0]], [[0, 20, 0], [Math.PI * 1 / 2, Math.PI, 0]], [[0, 50, 0], [Math.PI * 1 / 2, Math.PI, 0]] ]
     // useFrame(() => {
