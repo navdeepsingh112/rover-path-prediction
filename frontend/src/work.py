@@ -208,7 +208,9 @@ import numpy as np
 import pandas as pd
 import json
 # Path to your DEM file
-dem_file_path = 'E:/develop/isro/ch2_tmc_ndn_20240220T1230242871_d_dtm_d18/data/derived/20240220/ch2_tmc_ndn_20240220T1230242871_d_dtm_d18.tif'
+# dem_file_path = 'E:/develop/isro/ch2_tmc_ndn_20240220T1230242871_d_dtm_d18/data/derived/20240220/ch2_tmc_ndn_20240220T1230242871_d_dtm_d18.tif'
+
+dem_file_path = './src/tmc/ortho_clipped.tif'
 
 # Define the size of the square and calculate the offset
 square_size = 10
@@ -224,7 +226,7 @@ with rasterio.open(dem_file_path) as dataset:
     
     # Get the dimensions of the image
     rows, cols = elevation_data.shape
-    
+    print(rows,cols)
     # Calculate the start and end row and column indices
     start_row = 5000
     end_row = 10000
@@ -232,16 +234,17 @@ with rasterio.open(dem_file_path) as dataset:
     end_col = 6000
     
     # Extract the 10px x 10px square
-    square = elevation_data[start_row:end_row, start_col:end_col]
+    # square = elevation_data[start_row:end_row, start_col:end_col]
+    square = elevation_data[0:rows, 0:cols]
     
     # Create a DataFrame for the extracted data
     # df = pd.DataFrame(square/10)
     square = np.nan_to_num(square, nan=0)
-    data_list = (square / 10).tolist()
+    data_list = ((square-255)* -1 ).tolist()
     # Save the DataFrame to a CSV file
     # csv_file_path = 'elevation_data_center_square.csv'
     # df.to_csv(csv_file_path, index=False, header=False)
-    json_file_path = 'elevation_data_center_square.json'
+    json_file_path = 'ortho.json'
     with open(json_file_path, 'w') as json_file:
         json.dump(data_list, json_file)
 

@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useRaycastVehicle } from '@react-three/cannon'
-import  useControls  from './utils/useControls'
+import useControls from './utils/useControls'
 import Beetle from './Beetle'
 import Wheel from './Wheel'
 import { Vector3 } from 'three'
@@ -30,16 +30,17 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
         dampingRelaxation: 10,
         dampingCompression: 4.4,
         axleLocal: [-1, 0, 0],
-        chassisConnectionPointLocal: [1, 0, 1],
+        chassisConnectionPointLocal: [1, 1, 1],
         useCustomSlidingRotationalSpeed: true,
         customSlidingRotationalSpeed: -30,
-        frictionSlip: 2
-    };
+        frictionSlip: 2,
+        rotation:  [0, Math.PI / 2, 0],
+    }
 
-    const wheelInfo1 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [-width / 2, height, front] };
-    const wheelInfo2 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [width / 2, height, front] };
-    const wheelInfo3 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [-width / 2, height, back] };
-    const wheelInfo4 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [width / 2, height, back] };
+    const wheelInfo1 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [-width / 2 - 0.2, height+0.7, front-0.3] }
+    const wheelInfo2 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [width / 2 + 0.2, height+0.7, front-0.4] }
+    const wheelInfo3 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [-width / 2 - 0.2, height+0.7, back] }
+    const wheelInfo4 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [width / 2+ 0.2, height+0.7, back] }
 
     const [vehicle, api] = useRaycastVehicle(() => ({
         chassisBody: chassis,
@@ -110,10 +111,10 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
     });
 
     return (
-        <group ref={vehicle} position={[0, -0.4, 0]}>
+        <group ref={vehicle} position={[0, -0.4, 0]} castShadow>
             <Beetle ref={chassis} rotation={props.rotation} position={props.position} angularVelocity={props.angularVelocity} />
             <Wheel ref={wheel1} radius={radius} leftSide />
-            <Wheel ref={wheel2} radius={radius} />
+            <Wheel ref={wheel2} radius={radius} rotation={[0, Math.PI / 2, 0]} />
             <Wheel ref={wheel3} radius={radius} leftSide />
             <Wheel ref={wheel4} radius={radius} />
         </group>
