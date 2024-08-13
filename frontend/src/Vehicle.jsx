@@ -5,11 +5,14 @@ import  useControls  from './utils/useControls'
 import Beetle from './Beetle'
 import Wheel from './Wheel'
 import { Vector3 } from 'three'
+import predefinedPoints  from './predefinesPoints'
+
+const positions = predefinedPoints;
 
 // Sample array of positions, staying within the bounds of your terrain
 
   
-function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back = -1.15, steer = 0.75, force = 2000, maxBrake = 1e5, ...props }) {
+function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back = -1.15, steer = 0.75, force = 2000, maxBrake = 1e5, manualBool, ...props }) {
     const chassis = useRef();
     const wheel1 = useRef();
     const wheel2 = useRef();
@@ -48,11 +51,6 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
     }));
 
     
-    let positions = [
-        [0.5, 0, 0.5],
-        [0.7, 0, 0.6],
-        [0.9, 0, 1 ]
-      ];
     useFrame(() => {
         const { forward, backward, left, right, brake, reset, next, prev, currentPosition } = controls.current;
 
@@ -62,12 +60,31 @@ function Vehicle({ radius = 0.7, width = 1.2, height = -0.04, front = 1.3, back 
             if(next){
             const v1 = positions[currentPosition];
             const v2 = positions[currentPosition - 1];
-            vehicle.current.translateOnAxis(new Vector3(v1[0]-v2[0] ,v1[1]-v2[1],v1[2]-v2[2] ), 1);
+
+            const direction = new Vector3(v1[0] - v2[0], 0, v1[2] - v2[2]);
+            vehicle.current.translateX(direction.x);
+            vehicle.current.translateZ(direction.z);
+
+            
+
+            // vehicle.current.translateX(v1[0]-v2[0] / Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[2]-v2[2]), 2)));
+            // vehicle.current.translateZ(v1[2]-v2[2] / Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[2]-v2[2]), 2)));
+            // vehicle.current.translateOnAxis(new Vector3(v1[0]-v2[0]/ Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[2]-v2[2]), 2)),0,v1[2]-v2[2] /Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[2]-v2[2]), 2))), Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[2]-v2[2]), 2)));
+
+            const vector = new Vector3(v1[0], 0 , v1[2]).distanceTo(new Vector3(v2[0], 0 , v2[2]))
+            
+            
+            vehicle.current.translateOnAxis(direction.normalize() , );
             }
 
             if(prev){
                 const v1 = positions[currentPosition];
                 const v2 = positions[currentPosition + 1];
+
+                const direction = new Vector3(v1[0] - v2[0], 0, v1[2] - v2[2]);
+
+                direction.normalize();
+
                 vehicle.current.translateOnAxis(new Vector3(v1[0]-v2[0] / Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[1]-v2[1]), 2)+Math.pow((v1[2]-v2[2]), 2)) 
                 ,(v1[1]-v2[1]) / Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[1]-v2[1]), 2)+Math.pow((v1[2]-v2[2]), 2)),
                 (v1[2]-v2[2])/Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[1]-v2[1]), 2)+Math.pow((v1[2]-v2[2]), 2))), Math.sqrt(Math.pow((v1[0]-v2[0]), 2)+Math.pow((v1[1]-v2[1]), 2)+Math.pow((v1[2]-v2[2]), 2)));

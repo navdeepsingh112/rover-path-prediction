@@ -101,11 +101,14 @@ import { useHeightfield } from '@react-three/cannon';
 import { MeshPortalMaterial, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Pragyan from './models/Pragyan';
 import Vehicle from './Vehicle'
+import predefinedPoints from './predefinesPoints';
 
 
 const Marker = ({ position }) => {
   const markerRef = useRef();
   const pulseRef = useRef(0);
+
+  
 
   useFrame((state, delta) => {
     if (markerRef.current) {
@@ -157,11 +160,6 @@ const ConnectingLines = ({ points }) => {
   );
 };
 
-const predefinedPoints = [
-  [1, 29.3, -2.5],
-  [3.7, 29, -8],
-  [6.9, 29, -5 ]
-];
 
 
 // import "./styles.css";
@@ -318,6 +316,8 @@ const Plane = ({ tileData }) => {
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [tileData, setTileData] = useState([[0,0],[0,0]]);
+  const [isManualControl, setIsManualControl] = useState(true);
+  const [showPredefinedPoints, setShowPredefinedPoints] = useState(true);
 
   const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
       return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
@@ -348,35 +348,113 @@ export default function App() {
     }, []);
 
   return (
-    <Canvas camera={{ position: [-50, 100, 50], fov: 90 }} shadows>
+    <>
+    <Canvas camera={{ position: [-50, 100, 50], fov: 90 }} shadows key={isManualControl ? 'manual' : 'auto'}>
       {/* <color attach="background" args={["#94ebd8"]} /> */}
       <OrbitControls enablePan={true} />
       <ambientLight intensity={0.1} />
       <directionalLight position={[50, 5, 5]} />
 
-      <Physics>
-        {!loading && (
+    
+
+        {
+        isManualControl? (!loading && (
           <>
+          <Physics>
             <Plane tileData={tileData} />
             <ControllableBox />
-            <Vehicle position={[10, 100, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
+            <Vehicle position={[10, 100, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} manualBool = {isManualControl} />
             {/* {predefinedPoints.map((point, index) => (
               <Marker key={index} position={point} />
             ))} */}
-
+            {showPredefinedPoints &&
+            <>
             {predefinedPoints.map((point, index) => (
               <group key={index}>
                 <Marker position={point} />
                 <GlowingSphere position={point} />
               </group>
             ))}
-
-            
-            {/* Add connecting lines */}
             <ConnectingLines points={predefinedPoints} />
+            </>}
+            </Physics>
           </>
-        )}
-      </Physics>
+        )): (!loading && (
+          <>
+          <Physics>
+            <Plane tileData={tileData} />
+            <ControllableBox />
+            <Vehicle position={[predefinedPoints[0][0],predefinedPoints[0][1]+20, predefinedPoints[0][2] ]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
+
+            {showPredefinedPoints &&
+            <>
+            {predefinedPoints.map((point, index) => (
+              <group key={index}>
+                <Marker position={point} />
+                <GlowingSphere position={point} />
+              </group>
+            ))}
+            <ConnectingLines points={predefinedPoints} />
+            </>}
+            </Physics>
+          </>
+        ))}
+       
+        
+    
     </Canvas>
+
+     <ToggleButton isManualControl={isManualControl} setIsManualControl={setIsManualControl} />
+      <ShowPredefinedPointsButton showPredefinedPoints={showPredefinedPoints} setShowPredefinedPoints={setShowPredefinedPoints} />
+     </>
   );
 }
+
+
+const ToggleButton = ({ isManualControl, setIsManualControl }) => {
+  return (
+    <button
+      style={{
+        position: 'absolute',
+        bottom: '20px',
+        right: '20px',
+        padding: '10px',
+        backgroundColor: isManualControl ? '#4CAF50' : '#2196F3',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        zIndex: 1000,
+      }}
+      onClick={() => setIsManualControl(!isManualControl)}
+    >
+      {isManualControl ? 'Switch to Predefined Path' : 'Switch to Manual Control'}
+    </button>
+  );
+};
+
+const ShowPredefinedPointsButton = ({ showPredefinedPoints, setShowPredefinedPoints }) => {
+  return (
+    <button
+      style={{
+        position: 'absolute',
+        bottom : '20px',
+        right: '250px',
+        padding: '10px',
+        backgroundColor: showPredefinedPoints ? '#4CAF50' : '#2196F3',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        zIndex: 1000,
+      }}
+      onClick={() => setShowPredefinedPoints(!showPredefinedPoints)}
+    >
+      {showPredefinedPoints ? 'Hide Predefined Points' : 'Show Predefined Points'}
+    </button>
+  );
+};
+
+
+
+
