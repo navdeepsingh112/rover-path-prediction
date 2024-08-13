@@ -200,12 +200,12 @@ window.isKeyPressed = (key) => {
 };
 
 window.addEventListener('keydown', (e) => {
-  if(e.key!='v')
+  if (e.key != 'v' && e.key != 'n')
 {  window.pressedKeys[e.key] = true;
 }});
 
 window.addEventListener('keyup', (e) => {
-if(e.key!='v'){
+  if (e.key != 'v' && e.key != 'n'){
   window.pressedKeys[e.key] = false;}
 });
 
@@ -509,39 +509,43 @@ const Plane = ({ tileData }) => {
     </mesh>
   );
 };
+
 export default function App() {
   const [loading, setLoading] = useState(true);
-  const [tileData, setTileData] = useState([[0,0],[0,0]]);
+  const [tileData, setTileData] = useState([[0, 0], [0, 0]]);
   const [isManualControl, setIsManualControl] = useState(true);
   const [showPredefinedPoints, setShowPredefinedPoints] = useState(true);
-  const [texture, setTexture] = useState([[0,0],[0,0]]);
+  const [texture, setTexture] = useState([[0, 0], [0, 0]]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const vehicleRef = useRef();
+
+  // Sample predefinedPoints array (replace with your actual data)
+
   const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
-      return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
-    };
+    return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
+  };
 
   useEffect(() => {
     const jsonFilePath = 'dtm.json';
     const orthoPath = 'ortho.json';
-      fetch(jsonFilePath)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log(data, 'darta');
-          // const subArray = extractSubArray(data, 500, 700, 500, 700);
-          const subArray = data;
-          console.log(subArray);
-          const heights = subArray.map(row => row.map(cell => cell));
-          console.log(heights);
-          setTileData(heights);
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Error fetching JSON file:', error);
-        });
+
+    fetch(jsonFilePath)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        const subArray = data; // Modify as needed
+        const heights = subArray.map(row => row.map(cell => cell));
+        setTileData(heights);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching JSON file:', error);
+      });
+
     fetch(orthoPath)
       .then(response => {
         if (!response.ok) {
@@ -550,87 +554,104 @@ export default function App() {
         return response.json();
       })
       .then(data => {
-        console.log(data, 'darta');
-        // const subArray = extractSubArray(data, 500, 700, 500, 700);
-        const subArray = data;
-        console.log(subArray);
+        const subArray = data; // Modify as needed
         const heigh = subArray.map(row => row.map(cell => cell));
-        console.log(heigh);
         setTexture(heigh);
         setLoading(false);
       })
       .catch(error => {
         console.error('Error fetching JSON file:', error);
       });
-    }, []);
-  const vehicleRef = useRef();
+    const handleKeyDown = (event) => {
+      if (event.key === 'n') {
+        console.log('Moving to next position');
+        setCurrentIndex((prevIndex) => {
+          const newIndex = (prevIndex + 1) % predefinedPoints.length;
+          console.log('New index:', newIndex, predefinedPoints[newIndex]);
+          return newIndex;
+        });
+      } else if (event.key === 'p') {
+        console.log('Moving to previous position');
+        setCurrentIndex((prevIndex) => {
+          const newIndex = (prevIndex - 1 + predefinedPoints.length) % predefinedPoints.length;
+          console.log('New index:', newIndex, predefinedPoints[newIndex]);
+          return newIndex;
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+
+  console.log(currentIndex);
   return (
     <>
-    <Canvas shadows key={isManualControl ? 'manual' : 'auto'}>
-      <color attach="background" args={["#94ebd8"]} />
-      {/* <OrbitControls enablePan={true} /> */}
-      <ambientLight intensity={0.1} />
-      <directionalLight position={[50, 5, 5]} />
+      <Canvas shadows key={isManualControl ? 'manual' : 'auto'}>
+        <color attach="background" args={["#94ebd8"]} key={currentIndex} />
+        <ambientLight intensity={0.1} />
+        <directionalLight position={[50, 5, 5]} />
 
-    
-
-        {
-        isManualControl? (!loading && (
+        {isManualControl ? (!loading && (
           <>
-          <Physics>
-            <Plane tileData={tileData} />
-            {/* <ControllableBox /> */}
-            <Vehicle position={[predefinedPoints[0][0],predefinedPoints[0][1]+20, predefinedPoints[0][2] ]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} manualBool = {isManualControl} />
-            {/* {predefinedPoints.map((point, index) => (
-              <Marker key={index} position={point} />
-            ))} */}
-            {showPredefinedPoints &&
-            <>
-            {predefinedPoints.map((point, index) => (
-              <group key={index}>
-                <Marker position={point} />
-                <GlowingSphere position={point} />
-              </group>
-            ))}
-            <ConnectingLines points={predefinedPoints} />
-            </>}
+            <Physics>
+              <Plane tileData={tileData} />
+              <Vehicle
+                position={[100, 600, -100]}
+                rotation={[0, -Math.PI / 4, 0]}
+                angularVelocity={[0, 0.5, 0]}
+                wheelRadius={0.3}
+                manualBool={isManualControl}
+              />
+              {showPredefinedPoints &&
+                <>
+                  {predefinedPoints.map((point, index) => (
+                    <group key={index}>
+                      <Marker position={point} />
+                      <GlowingSphere position={point} />
+                    </group>
+                  ))}
+                  <ConnectingLines points={predefinedPoints} />
+                </>}
             </Physics>
           </>
-        )): (!loading && (
+        )) : (!loading && (
           <>
-          <Physics>
-            <Plane tileData={tileData} grayscaleData={texture}/>
-            {/* <ControllableBox /> */}
-            {/* <PerspectiveCamera makeDefault position={[10, 50, 40]} /> */}
-            <Vehicle  position={[100, 600, -100]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
-            {/* <FollowCamera vehicleRef={vehicleRef} /> */}
-            {/* <ControllableBox /> */}
-            {/* <Vehicle position={[predefinedPoints[0][0],predefinedPoints[0][1]+20, predefinedPoints[0][2] ]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} /> */}
-
-            {showPredefinedPoints &&
-            <>
-            {predefinedPoints.map((point, index) => (
-              <group key={index}>
-                <Marker position={point} />
-                <GlowingSphere position={point} />
-              </group>
-            ))}
-            <ConnectingLines points={predefinedPoints} />
-            </>}
+            <Physics>
+              <Plane tileData={tileData} grayscaleData={texture} />
+              <Vehicle
+                position={predefinedPoints[currentIndex]}
+                rotation={[0, -Math.PI / 4, 0]}
+                angularVelocity={[0, 0.5, 0]}
+                wheelRadius={0.3}
+              />
+              {showPredefinedPoints &&
+                <>
+                  {predefinedPoints.map((point, index) => (
+                    <group key={index}>
+                      <Marker position={point} />
+                      <GlowingSphere position={point} />
+                    </group>
+                  ))}
+                  <ConnectingLines points={predefinedPoints} />
+                </>}
             </Physics>
           </>
         ))}
-       
-        
-    
-    </Canvas>
+      </Canvas>
 
-     <ToggleButton isManualControl={isManualControl} setIsManualControl={setIsManualControl} />
-      <ShowPredefinedPointsButton showPredefinedPoints={showPredefinedPoints} setShowPredefinedPoints={setShowPredefinedPoints} />
-     </>
+      <ToggleButton
+        isManualControl={isManualControl}
+        setIsManualControl={setIsManualControl}
+      />
+      <ShowPredefinedPointsButton
+        showPredefinedPoints={showPredefinedPoints}
+        setShowPredefinedPoints={setShowPredefinedPoints}
+      />
+    </>
   );
 }
-
 
 const ToggleButton = ({ isManualControl, setIsManualControl }) => {
   return (
@@ -653,7 +674,27 @@ const ToggleButton = ({ isManualControl, setIsManualControl }) => {
     </button>
   );
 };
-
+const ToggleButton1 = ({ isManualControl, setIsManualControl }) => {
+  return (
+    <button
+      style={{
+        position: 'absolute',
+        bottom: '20px',
+        right: '20px',
+        padding: '10px',
+        backgroundColor: isManualControl ? '#4CAF50' : '#2196F3',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        zIndex: 1000,
+      }}
+      onClick={() => setIsManualControl(!isManualControl)}
+    >
+      {isManualControl ? 'Switch to Predefined Path' : 'Switch to Manual Control'}
+    </button>
+  );
+};
 const ShowPredefinedPointsButton = ({ showPredefinedPoints, setShowPredefinedPoints }) => {
   return (
     <button
