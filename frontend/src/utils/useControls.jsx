@@ -33,7 +33,6 @@ export default function useControls() {
         nPressed: false, // Track if 'n' is pressed
         pPressed: false  // Track if 'p' is pressed
     });
-
     useKeyPress(['ArrowUp', 'w'], (pressed) => (keys.current.forward = pressed));
     useKeyPress(['ArrowDown', 's'], (pressed) => (keys.current.backward = pressed));
     useKeyPress(['ArrowLeft', 'a'], (pressed) => (keys.current.left = pressed));

@@ -161,7 +161,7 @@ const ConnectingLines = ({ points }) => {
 };
 
 
-
+// import InclinationDisplay from './utils/inclination';
 // import "./styles.css";
 const ControllableBox = () => {
 
@@ -510,7 +510,7 @@ const Plane = ({ tileData }) => {
   );
 };
 
-export default function App() {
+export default function TerrainMain() {
   const [loading, setLoading] = useState(true);
   const [tileData, setTileData] = useState([[0, 0], [0, 0]]);
   const [isManualControl, setIsManualControl] = useState(true);
@@ -524,7 +524,6 @@ export default function App() {
   const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
     return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
   };
-
   useEffect(() => {
     const jsonFilePath = 'dtm.json';
     const orthoPath = 'ortho.json';
@@ -584,7 +583,21 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+useEffect(() => {
+    const handleKeyDown = (event) => {
+        if (event.key === 'h') {
+            setHover(!hover);
+        }
+    };
 
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup the event listener
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+}, [hover]);
+ 
   console.log(currentIndex);
   return (
     <>
