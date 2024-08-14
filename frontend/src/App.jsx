@@ -598,7 +598,7 @@ export default function App() {
             <Physics>
               <Plane tileData={tileData} />
               <Vehicle
-                position={[100, 600, -100]}
+                position={[1, 1, -0]}
                 rotation={[0, -Math.PI / 4, 0]}
                 angularVelocity={[0, 0.5, 0]}
                 wheelRadius={0.3}
@@ -621,7 +621,7 @@ export default function App() {
             <Physics>
               <Plane tileData={tileData} grayscaleData={texture} />
               <Vehicle
-                position={predefinedPoints[currentIndex]}
+                position={[1,1,1]}
                 rotation={[0, -Math.PI / 4, 0]}
                 angularVelocity={[0, 0.5, 0]}
                 wheelRadius={0.3}

@@ -20,6 +20,7 @@ function Vehicle({ radius = 1.2, width = 1.2, height = -0.04, front = 1.3, back 
     let isKeyDown = false;
     let isCooldown = false;
     const [i, si] = useState(true);
+    const [ii , sii] = useState(0);
     // const [inclination, setInclination] = useState(0);
   
   
@@ -89,7 +90,12 @@ function Vehicle({ radius = 1.2, width = 1.2, height = -0.04, front = 1.3, back 
             if (event.key === 'g') {
                 si(!i);
             }
-        };
+    //         else if(event.key == 'n'){
+    //             sii((prevI) => (prevI + 1) % positions.length);
+    // // const [i, si] = useState(true);
+    // api.position.set(positions[ii][0], positions[ii][1], positions[ii][2]);
+    //         }
+    //     };
 
         window.addEventListener('keydown', handleKeyDown);
 
@@ -100,8 +106,8 @@ function Vehicle({ radius = 1.2, width = 1.2, height = -0.04, front = 1.3, back 
     }, [i]);
 
     return (
-        <group ref={vehicle} position={[0, -0.4, 0]} castShadow>
-            <Beetle ref={chassis} rotation={props.rotation} position={props.position} angularVelocity={props.angularVelocity} />
+        <group  ref={vehicle}  castShadow>
+            <Beetle  ref={chassis} rotation={props.rotation}  angularVelocity={props.angularVelocity} />
             <Wheel ref={wheel1} radius={radius} leftSide />
             <Wheel ref={wheel2} radius={radius} />
             <Wheel ref={wheel3} radius={radius} leftSide />
