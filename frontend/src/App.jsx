@@ -113,24 +113,30 @@ const Marker = ({ position }) => {
   useFrame((state, delta) => {
     if (markerRef.current) {
       // Pulsating size
-      pulseRef.current += delta * 2; // Adjust the multiplier to change pulsation speed
-      const scale = 1 + Math.sin(pulseRef.current) * 0.2; // Adjust the multiplier to change pulsation intensity
+      pulseRef.current += delta * 20; // Adjust the multiplier to change pulsation speed
+      const scale = 2 + Math.sin(pulseRef.current) * 0.1; // Adjust the multiplier to change pulsation intensity
       markerRef.current.scale.set(scale, scale, scale);
 
       // Pulsating glow
-      const emissiveIntensity = 0.5 + Math.sin(pulseRef.current) * 0.3; // Adjust these values to change glow intensity
+      const emissiveIntensity = 0.05 + Math.sin(pulseRef.current) * 0.3; // Adjust these values to change glow intensity
       markerRef.current.material.emissiveIntensity = emissiveIntensity;
+
+      // Flip 180 degrees
+      markerRef.current.rotation.x = Math.PI;
+
+      // Floating animation
+      markerRef.current.position.y += Math.sin(pulseRef.current) * 0.01; // Adjust the amplitude and frequency to change the floating effect
     }
   });
 
   return (
     <mesh ref={markerRef} position={position}>
-      <sphereGeometry args={[0.5, 32, 32]} />
-      <meshStandardMaterial 
-        color="white" 
-        emissive="white" 
-        emissiveIntensity={0.5} 
-        toneMapped={false} // This helps with the glow effect
+      <coneGeometry args={[0.2, 0.5, 32]} />
+      <meshStandardMaterial
+        color="red"
+        emissive="red"
+        emissiveIntensity={0.5}
+        toneMapped={false}
       />
     </mesh>
   );
@@ -429,6 +435,48 @@ const createReducedGrayscaleData = (grayscaleData, width, height) => {
 //     </mesh>
 //   );
 // };
+
+function Card() {
+  const [isOpen, setIsOpen] = useState(false);
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'i') {
+        setIsOpen(!isOpen);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <mesh ref={(mesh) => {
+      if (mesh) {
+        mesh.position.set(0, 0, 0);
+        mesh.rotation.set(0, 0, 0);
+      }
+    }}>
+      <boxGeometry args={[1, 1, 0.1]} />
+      <meshBasicMaterial color={isOpen ? 'green' : 'red'} />
+      {isOpen && (
+        <group>
+          <mesh position={[0, 0, 0.1]}>
+            <planeGeometry args={[1, 1]} />
+            <meshBasicMaterial color="white" />
+          </mesh>
+          <mesh position={[0, 0, 0.2]}>
+            <textGeometry args={['Hello, World!', 0.1, 0.1]} />
+            <meshBasicMaterial color="black" />
+          </mesh>
+        </group>
+      )}
+    </mesh>
+  );
+}
+
 const Plane = ({ tileData }) => {
   const [ref] = useHeightfield(() => ({
     args: [tileData, { elementSize: 1 }],
@@ -519,13 +567,27 @@ export default function App() {
   const [texture, setTexture] = useState([[0, 0], [0, 0]]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const vehicleRef = useRef();
+  const [hover, setHover] = useState(false);
 
   // Sample predefinedPoints array (replace with your actual data)
 
   const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
     return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
   };
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'h') {
+        setHover(!hover);
+      }
+    };
 
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup the event listener
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [hover]);
   useEffect(() => {
     const jsonFilePath = 'dtm.json';
     const orthoPath = 'ortho.json';
@@ -596,7 +658,7 @@ export default function App() {
 
         {isManualControl ? (!loading && (
           <>
-            <Physics>
+            <Physics gravity={[0, !hover ? -9.81 : -5.5, 0]}>
               <Plane tileData={tileData} />
               <Vehicle
               scale = {0.01}
@@ -652,10 +714,174 @@ export default function App() {
         showPredefinedPoints={showPredefinedPoints}
         setShowPredefinedPoints={setShowPredefinedPoints}
       />
+      <ArrowKeyButtons />
+      <ArrowKeyButtons1 />
     </>
   );
 }
+// function ArrowKeyButtons() {
+//   const triggerKeyEvent = (key, eventType) => {
+//     const event = new KeyboardEvent(eventType, { key });
+//     window.dispatchEvent(event);
+//   };
 
+//   return (
+//     <div style={{
+//       position: 'absolute',
+//       bottom: '40px',
+//       left: '20px',
+//       padding: '10px',
+//       color: 'white',
+//       border: 'none',
+//       borderRadius: '5px',
+//       cursor: 'pointer',
+//       zIndex: 1000,
+//     }}>
+//       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+//         <button
+//           onMouseDown={() => triggerKeyEvent('ArrowUp', 'keydown')}
+//           onMouseUp={() => triggerKeyEvent('ArrowUp', 'keyup')}
+//           style={{ marginBottom: '10px' }}
+//         >
+//           ↑
+//         </button>
+//         <div style={{ display: 'flex', justifyContent: 'center' }}>
+//           <button
+//             onMouseDown={() => triggerKeyEvent('ArrowLeft', 'keydown')}
+//             onMouseUp={() => triggerKeyEvent('ArrowLeft', 'keyup')}
+//             style={{ marginRight: '10px' }}
+//           >
+//             ←
+//           </button>
+//           <button
+//             onMouseDown={() => triggerKeyEvent('ArrowRight', 'keydown')}
+//             onMouseUp={() => triggerKeyEvent('ArrowRight', 'keyup')}
+//           >
+//             →
+//           </button>
+//         </div>
+//         <button
+//           onMouseDown={() => triggerKeyEvent('ArrowDown', 'keydown')}
+//           onMouseUp={() => triggerKeyEvent('ArrowDown', 'keyup')}
+//           style={{ marginTop: '10px' }}
+//         >
+//           ↓
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
+
+function ArrowKeyButtons() {
+  const triggerKeyEvent = (key, eventType) => {
+    const event = new KeyboardEvent(eventType, { key });
+    window.dispatchEvent(event);
+  };
+
+  const handleTouchStart = (key) => {
+    triggerKeyEvent(key, 'keydown');
+  };
+
+  const handleTouchEnd = (key) => {
+    triggerKeyEvent(key, 'keyup');
+  };
+
+  return (
+    <div style={{
+      position: 'absolute',
+      bottom: '40px',
+      left: '20px',
+      padding: '10px',
+      color: 'white',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+      zIndex: 1000,
+      userSelect: 'none', // Prevent text selection
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', userSelect:'none'}}>
+        <button
+          onMouseDown={() => triggerKeyEvent('ArrowUp', 'keydown')}
+          onMouseUp={() => triggerKeyEvent('ArrowUp', 'keyup')}
+          onTouchStart={() => handleTouchStart('ArrowUp')}
+          onTouchEnd={() => handleTouchEnd('ArrowUp')}
+          style={{ marginBottom: '10px' }}
+        >
+          ↑
+        </button>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <button
+            onMouseDown={() => triggerKeyEvent('ArrowLeft', 'keydown')}
+            onMouseUp={() => triggerKeyEvent('ArrowLeft', 'keyup')}
+            onTouchStart={() => handleTouchStart('ArrowLeft')}
+            onTouchEnd={() => handleTouchEnd('ArrowLeft')}
+            style={{ marginRight: '10px' }}
+          >
+            ←
+          </button>
+          <button
+            onMouseDown={() => triggerKeyEvent('ArrowRight', 'keydown')}
+            onMouseUp={() => triggerKeyEvent('ArrowRight', 'keyup')}
+            onTouchStart={() => handleTouchStart('ArrowRight')}
+            onTouchEnd={() => handleTouchEnd('ArrowRight')}
+          >
+            →
+          </button>
+        </div>
+        <button
+          onMouseDown={() => triggerKeyEvent('ArrowDown', 'keydown')}
+          onMouseUp={() => triggerKeyEvent('ArrowDown', 'keyup')}
+          onTouchStart={() => handleTouchStart('ArrowDown')}
+          onTouchEnd={() => handleTouchEnd('ArrowDown')}
+          style={{ marginTop: '10px' }}
+        >
+          ↓
+        </button>
+      </div>
+    </div>
+  );
+}
+function ArrowKeyButtons1() {
+  const triggerKeyEvent = (key, eventType) => {
+    const event = new KeyboardEvent(eventType, { key });
+    window.dispatchEvent(event);
+  };
+
+  const handleTouchStart = (key) => {
+    triggerKeyEvent(key, 'keydown');
+  };
+
+  const handleTouchEnd = (key) => {
+    triggerKeyEvent(key, 'keyup');
+  };
+
+  return (
+    <div style={{
+      position: 'absolute',
+      bottom: '50px',
+      right: '20px',
+      padding: '10px',
+      color: 'white',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+      zIndex: 1000,
+      userSelect: 'none', // Prevent text selection
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', userSelect: 'none' }}>
+        <button
+          onMouseDown={() => triggerKeyEvent('m', 'keydown')}
+          onMouseUp={() => triggerKeyEvent('m', 'keyup')}
+          onTouchStart={() => handleTouchStart('m')}
+          onTouchEnd={() => handleTouchEnd('m')}
+          style={{ marginBottom: '10px' }}
+        >
+          Change map
+        </button>
+      </div>
+    </div>
+  );
+}
 const ToggleButton = ({ isManualControl, setIsManualControl }) => {
   return (
     <button
