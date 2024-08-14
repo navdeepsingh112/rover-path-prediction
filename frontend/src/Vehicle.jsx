@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useRaycastVehicle } from '@react-three/cannon'
 import useControls from './utils/useControls'
@@ -19,6 +19,7 @@ function Vehicle({ radius = 1.2, width = 1.2, height = -0.04, front = 1.3, back 
     const controls = useControls();
     let isKeyDown = false;
     let isCooldown = false;
+    const [i, si] = useState(true);
     // const [inclination, setInclination] = useState(0);
   
   
