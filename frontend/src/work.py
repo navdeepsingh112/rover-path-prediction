@@ -210,7 +210,7 @@ import json
 # Path to your DEM file
 # dem_file_path = 'E:/develop/isro/ch2_tmc_ndn_20240220T1230242871_d_dtm_d18/data/derived/20240220/ch2_tmc_ndn_20240220T1230242871_d_dtm_d18.tif'
 
-dem_file_path = './src/tmc/ortho_clipped.tif'
+dem_file_path = './src/tmc/ortho.tif'
 
 # Define the size of the square and calculate the offset
 square_size = 10

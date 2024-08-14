@@ -1,21 +1,27 @@
-import { useEffect, useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { useRaycastVehicle } from '@react-three/cannon';
-import useControls from './utils/useControls';
-import Beetle from './Beetle';
-import Wheel from './Wheel';
-import * as THREE from 'three';
+import { useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { useRaycastVehicle } from '@react-three/cannon'
+import useControls from './utils/useControls'
+import Beetle from './Beetle'
+import Wheel from './Wheel'
+import { Vector3 } from 'three'
+import predefinedPoints  from './predefinesPoints'
 
-function Vehicle({ radius = 1.2, width = 1.2, height = -0.04, front = 1.3, back = -1.15, steer = 0.75, force = 2000, maxBrake = 1e5, ...props }) {
+const positions = predefinedPoints;
+
+  
+function Vehicle({ radius = 1.2, width = 1.2, height = -0.04, front = 1.3, back = -1.15, steer = 0.75, force = 2000, maxBrake = 1e5, manualBool, ...props }) {
     const chassis = useRef();
     const wheel1 = useRef();
     const wheel2 = useRef();
     const wheel3 = useRef();
     const wheel4 = useRef();
     const controls = useControls();
-    const [i, si] = useState(true);
+    let isKeyDown = false;
+    let isCooldown = false;
     // const [inclination, setInclination] = useState(0);
-
+  
+  
     const wheelInfo = {
         radius,
         directionLocal: [0, -1, 0],
@@ -47,10 +53,13 @@ function Vehicle({ radius = 1.2, width = 1.2, height = -0.04, front = 1.3, back 
         indexRightAxis: 0,
         indexUpAxis: 1
     }));
+    const translationDuration = 5000;
+    const interval = 1; // Interval in milliseconds for updating the position
 
     useFrame(() => {
-        const { forward, backward, left, right, brake, reset } = controls.current;
-        const moving = forward || backward;
+        const { forward, backward, left, right, brake, reset, next, prev, currentPosition } = controls.current;
+
+            const moving = forward || backward;
         const mov2 = left || right;
 
         // Apply engine force and steering
@@ -63,25 +72,18 @@ function Vehicle({ radius = 1.2, width = 1.2, height = -0.04, front = 1.3, back 
                 api.setBrake(brake ? maxBrake : 0, 2);
             }
         }
+      
+            if (reset) {
+                // vehicle.current.position.set(0, -0.5, 0);
 
-        // Reset position
-        if (reset) {
-            chassis.current.api.position.set(0, 0.5, 0);
-            chassis.current.api.velocity.set(0, 0, 0);
-            chassis.current.api.angularVelocity.set(0, 0.5, 0);
-            chassis.current.api.rotation.set(0, -Math.PI / 4, 0);
-        }
-
-        // // Calculate inclination
-        // if (chassis.current) {
-        //     const rotation = chassis.current.api.rotation;
-        //     const euler = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(...rotation));
-        //     const inclinationAngle = THREE.MathUtils.radToDeg(euler.x); // Assuming inclination around X-axis
-        //     setInclination(inclinationAngle.toFixed(2));
-        // }
+                // vehicle.current.position.transformDirection(0, -0.5, 0);
+                
+                vehicle.current.translateOnAxis(new Vector3(0.5, 0, -0.5), 1);
+                // vehicle.current.rotation.set(0, -Math.PI / 4, 0);
+            }
+        
     });
-
-    useEffect(() => {
+   useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.key === 'g') {
                 si(!i);

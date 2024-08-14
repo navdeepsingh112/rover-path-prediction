@@ -101,6 +101,66 @@ import { useHeightfield } from '@react-three/cannon';
 import { MeshPortalMaterial, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import Pragyan from './models/Pragyan';
 import Vehicle from './Vehicle'
+import predefinedPoints from './predefinesPoints';
+
+
+const Marker = ({ position }) => {
+  const markerRef = useRef();
+  const pulseRef = useRef(0);
+
+  
+
+  useFrame((state, delta) => {
+    if (markerRef.current) {
+      // Pulsating size
+      pulseRef.current += delta * 2; // Adjust the multiplier to change pulsation speed
+      const scale = 1 + Math.sin(pulseRef.current) * 0.2; // Adjust the multiplier to change pulsation intensity
+      markerRef.current.scale.set(scale, scale, scale);
+
+      // Pulsating glow
+      const emissiveIntensity = 0.5 + Math.sin(pulseRef.current) * 0.3; // Adjust these values to change glow intensity
+      markerRef.current.material.emissiveIntensity = emissiveIntensity;
+    }
+  });
+
+  return (
+    <mesh ref={markerRef} position={position}>
+      <sphereGeometry args={[0.5, 32, 32]} />
+      <meshStandardMaterial 
+        color="white" 
+        emissive="white" 
+        emissiveIntensity={0.5} 
+        toneMapped={false} // This helps with the glow effect
+      />
+    </mesh>
+  );
+};
+
+import { Sphere } from '@react-three/drei';
+
+const GlowingSphere = ({ position }) => {
+  return (
+    <Sphere args={[0.6, 32, 32]} position={position}>
+      <meshBasicMaterial color="white" transparent opacity={0.2} />
+    </Sphere>
+  );
+};
+
+
+const ConnectingLines = ({ points }) => {
+  const lineGeometry = useMemo(() => {
+    const geometry = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(...p)));
+    return geometry;
+  }, [points]);
+
+  return (
+    <line geometry={lineGeometry}>
+      <lineBasicMaterial attach="material" color="white" linewidth={2} />
+    </line>
+  );
+};
+
+
 // import InclinationDisplay from './utils/inclination';
 // import "./styles.css";
 const ControllableBox = () => {
@@ -140,12 +200,12 @@ window.isKeyPressed = (key) => {
 };
 
 window.addEventListener('keydown', (e) => {
-  if(e.key!='v')
+  if (e.key != 'v' && e.key != 'n')
 {  window.pressedKeys[e.key] = true;
 }});
 
 window.addEventListener('keyup', (e) => {
-if(e.key!='v'){
+  if (e.key != 'v' && e.key != 'n'){
   window.pressedKeys[e.key] = false;}
 });
 
@@ -449,36 +509,42 @@ const Plane = ({ tileData }) => {
     </mesh>
   );
 };
+
 export default function TerrainMain() {
   const [loading, setLoading] = useState(true);
-  const [tileData, setTileData] = useState([[0,0],[0,0]]);
-  const [hover,setHover] = useState(false);  const [texture, setTexture] = useState([[0,0],[0,0]]);
+  const [tileData, setTileData] = useState([[0, 0], [0, 0]]);
+  const [isManualControl, setIsManualControl] = useState(true);
+  const [showPredefinedPoints, setShowPredefinedPoints] = useState(true);
+  const [texture, setTexture] = useState([[0, 0], [0, 0]]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const vehicleRef = useRef();
+
+  // Sample predefinedPoints array (replace with your actual data)
+
   const extractSubArray = (data, startRow, endRow, startCol, endCol) => {
-      return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
-    };
+    return data.slice(startRow, endRow).map(row => row.slice(startCol, endCol).map(cell => Math.abs(cell)));
+  };
   useEffect(() => {
     const jsonFilePath = 'dtm.json';
     const orthoPath = 'ortho.json';
-      fetch(jsonFilePath)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log(data, 'darta');
-          // const subArray = extractSubArray(data, 500, 700, 500, 700);
-          const subArray = data;
-          console.log(subArray);
-          const heights = subArray.map(row => row.map(cell => cell));
-          console.log(heights);
-          setTileData(heights);
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Error fetching JSON file:', error);
-        });
+
+    fetch(jsonFilePath)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        const subArray = data; // Modify as needed
+        const heights = subArray.map(row => row.map(cell => cell));
+        setTileData(heights);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching JSON file:', error);
+      });
+
     fetch(orthoPath)
       .then(response => {
         if (!response.ok) {
@@ -487,20 +553,37 @@ export default function TerrainMain() {
         return response.json();
       })
       .then(data => {
-        console.log(data, 'darta');
-        // const subArray = extractSubArray(data, 500, 700, 500, 700);
-        const subArray = data;
-        console.log(subArray);
+        const subArray = data; // Modify as needed
         const heigh = subArray.map(row => row.map(cell => cell));
-        console.log(heigh);
         setTexture(heigh);
         setLoading(false);
       })
       .catch(error => {
         console.error('Error fetching JSON file:', error);
       });
-    }, []);
-  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'n') {
+        console.log('Moving to next position');
+        setCurrentIndex((prevIndex) => {
+          const newIndex = (prevIndex + 1) % predefinedPoints.length;
+          console.log('New index:', newIndex, predefinedPoints[newIndex]);
+          return newIndex;
+        });
+      } else if (event.key === 'p') {
+        console.log('Moving to previous position');
+        setCurrentIndex((prevIndex) => {
+          const newIndex = (prevIndex - 1 + predefinedPoints.length) % predefinedPoints.length;
+          console.log('New index:', newIndex, predefinedPoints[newIndex]);
+          return newIndex;
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+useEffect(() => {
     const handleKeyDown = (event) => {
         if (event.key === 'h') {
             setHover(!hover);
@@ -514,32 +597,142 @@ export default function TerrainMain() {
         window.removeEventListener('keydown', handleKeyDown);
     };
 }, [hover]);
+ 
+  console.log(currentIndex);
   return (
     <>
-    <Canvas  shadows >
-      {/* <color attach="background" args={["#94ebd8"]} /> */}
-      {/* <OrbitControls enablePan={true} /> */}
-      <ambientLight intensity={0.1} />
-      <directionalLight position={[50, 5, 5]} />
+      <Canvas shadows key={isManualControl ? 'manual' : 'auto'}>
+        <color attach="background" args={["#94ebd8"]} key={currentIndex} />
+        <ambientLight intensity={0.1} />
+        <directionalLight position={[50, 5, 5]} />
 
-      <Physics gravity={[0,!hover?-9.81:-5.5,0]}>
-        {!loading && (
+        {isManualControl ? (!loading && (
           <>
-            <Plane tileData={tileData} grayscaleData={texture}/>/
-            {/* <ControllableBox /> */}
-            {/* <PerspectiveCamera makeDefault position={[10, 50, 40]} /> */}
-            <Vehicle  position={[100, 600, -100]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} />
-            {/* <FollowCamera vehicleRef={vehicleRef} /> */}
-            {/* <ControllableBox /> */}
-            {/* <Vehicle position={[10, 200, -10]} rotation={[0, -Math.PI / 4, 0]} angularVelocity={[0, 0.5, 0]} wheelRadius={0.3} /> */}
+            <Physics>
+              <Plane tileData={tileData} />
+              <Vehicle
+                position={[100, 600, -100]}
+                rotation={[0, -Math.PI / 4, 0]}
+                angularVelocity={[0, 0.5, 0]}
+                wheelRadius={0.3}
+                manualBool={isManualControl}
+              />
+              {showPredefinedPoints &&
+                <>
+                  {predefinedPoints.map((point, index) => (
+                    <group key={index}>
+                      <Marker position={point} />
+                      <GlowingSphere position={point} />
+                    </group>
+                  ))}
+                  <ConnectingLines points={predefinedPoints} />
+                </>}
+            </Physics>
           </>
-        )}
-      </Physics>
-    </Canvas>
-    {/* <InclinationDisplay/> */}
+        )) : (!loading && (
+          <>
+            <Physics>
+              <Plane tileData={tileData} grayscaleData={texture} />
+              <Vehicle
+                position={predefinedPoints[currentIndex]}
+                rotation={[0, -Math.PI / 4, 0]}
+                angularVelocity={[0, 0.5, 0]}
+                wheelRadius={0.3}
+              />
+              {showPredefinedPoints &&
+                <>
+                  {predefinedPoints.map((point, index) => (
+                    <group key={index}>
+                      <Marker position={point} />
+                      <GlowingSphere position={point} />
+                    </group>
+                  ))}
+                  <ConnectingLines points={predefinedPoints} />
+                </>}
+            </Physics>
+          </>
+        ))}
+      </Canvas>
+
+      <ToggleButton
+        isManualControl={isManualControl}
+        setIsManualControl={setIsManualControl}
+      />
+      <ShowPredefinedPointsButton
+        showPredefinedPoints={showPredefinedPoints}
+        setShowPredefinedPoints={setShowPredefinedPoints}
+      />
     </>
   );
 }
+
+const ToggleButton = ({ isManualControl, setIsManualControl }) => {
+  return (
+    <button
+      style={{
+        position: 'absolute',
+        bottom: '20px',
+        right: '20px',
+        padding: '10px',
+        backgroundColor: isManualControl ? '#4CAF50' : '#2196F3',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        zIndex: 1000,
+      }}
+      onClick={() => setIsManualControl(!isManualControl)}
+    >
+      {isManualControl ? 'Switch to Predefined Path' : 'Switch to Manual Control'}
+    </button>
+  );
+};
+const ToggleButton1 = ({ isManualControl, setIsManualControl }) => {
+  return (
+    <button
+      style={{
+        position: 'absolute',
+        bottom: '20px',
+        right: '20px',
+        padding: '10px',
+        backgroundColor: isManualControl ? '#4CAF50' : '#2196F3',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        zIndex: 1000,
+      }}
+      onClick={() => setIsManualControl(!isManualControl)}
+    >
+      {isManualControl ? 'Switch to Predefined Path' : 'Switch to Manual Control'}
+    </button>
+  );
+};
+const ShowPredefinedPointsButton = ({ showPredefinedPoints, setShowPredefinedPoints }) => {
+  return (
+    <button
+      style={{
+        position: 'absolute',
+        bottom : '20px',
+        right: '250px',
+        padding: '10px',
+        backgroundColor: showPredefinedPoints ? '#4CAF50' : '#2196F3',
+        color: 'white',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        zIndex: 1000,
+      }}
+      onClick={() => setShowPredefinedPoints(!showPredefinedPoints)}
+    >
+      {showPredefinedPoints ? 'Hide Predefined Points' : 'Show Predefined Points'}
+    </button>
+  );
+};
+
+
+
+
 // const FollowCamera = ({ vehicleRef }) => {
 //   const cameraRef = useRef();
 
