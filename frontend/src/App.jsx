@@ -435,7 +435,8 @@ const Plane = ({ tileData }) => {
     rotation: [-Math.PI / 2, 0, 0],
     position: [0, 0, 0],
   }));
-  const tture = ['reduced_texture.png', 'reduced_texture1.png', 'reduced_texture.png'];
+  // const tture = ['reduced_texture.png', 'reduced_texture1.png', 'reduced_texture.png'];
+  const tture = ['ohrc.png', 'ortho.png', 'orthob.png','ohrc.png'];
   const [ii, sii] = useState(0);
   console.log(ii);
   useEffect(() => {
@@ -589,7 +590,7 @@ export default function App() {
   return (
     <>
       <Canvas shadows key={isManualControl ? 'manual' : 'auto'}>
-        <color attach="background" args={["#94ebd8"]} key={currentIndex} />
+        {/* <color attach="background" args={["#94ebd8"]} key={currentIndex} /> */}
         <ambientLight intensity={0.1} />
         <directionalLight position={[50, 5, 5]} />
 
@@ -598,6 +599,7 @@ export default function App() {
             <Physics>
               <Plane tileData={tileData} />
               <Vehicle
+              scale = {0.01}
                 position={[100, 600, -100]}
                 rotation={[0, -Math.PI / 4, 0]}
                 angularVelocity={[0, 0.5, 0]}
@@ -621,6 +623,7 @@ export default function App() {
             <Physics>
               <Plane tileData={tileData} grayscaleData={texture} />
               <Vehicle
+              scale = {0.01}
                 position={predefinedPoints[currentIndex]}
                 rotation={[0, -Math.PI / 4, 0]}
                 angularVelocity={[0, 0.5, 0]}

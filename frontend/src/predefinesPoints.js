@@ -9,7 +9,7 @@ const predefinedPoints = [];
 points.forEach(point => {
   const x = point[0];
   const z = point[1];
-  const y = tiledata[x][z]+10; // Assuming tiledata is indexed by points[x][y]
+  const y = tiledata[x][z]+1; // Assuming tiledata is indexed by points[x][y]
 
   predefinedPoints.push([x, y, -z]);
 });

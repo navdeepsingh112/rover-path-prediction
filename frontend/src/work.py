@@ -207,10 +207,20 @@ import rasterio
 import numpy as np
 import pandas as pd
 import json
+from scipy.ndimage import zoom
+from PIL import Image
 # Path to your DEM file
 # dem_file_path = 'E:/develop/isro/ch2_tmc_ndn_20240220T1230242871_d_dtm_d18/data/derived/20240220/ch2_tmc_ndn_20240220T1230242871_d_dtm_d18.tif'
-
-dem_file_path = './src/tmc/ortho.tif'
+def save_grayscale_texture(grayscale_data, output_filename):
+    # Reduce the grayscale data dimensions by half
+    # reduced_grayscale = reduce_grayscale_data(grayscale_data)
+    
+    # Convert the reduced grayscale data to a PIL image
+    image = Image.fromarray(grayscale_data, mode='L')
+    
+    # Save the image as a PNG file
+    image.save(output_filename)
+dem_file_path = './src/tmc/ohrc.tif'
 
 # Define the size of the square and calculate the offset
 square_size = 10
@@ -220,6 +230,8 @@ offset = square_size // 2
 with rasterio.open(dem_file_path) as dataset:
     # Read the DEM data (first band)
     elevation_data = dataset.read(1)
+    upscale_factor = 2666 / 495
+    # elevation_data = zoom(elevation_data, upscale_factor, order=1)
     
     # Replace missing data values (-32768) with NaN
     elevation_data = np.where(elevation_data == -32768, np.nan, elevation_data)
@@ -240,11 +252,12 @@ with rasterio.open(dem_file_path) as dataset:
     # Create a DataFrame for the extracted data
     # df = pd.DataFrame(square/10)
     square = np.nan_to_num(square, nan=0)
-    data_list = ((square-255)* -1 ).tolist()
+    data_list = ((square ) ).tolist()
     # Save the DataFrame to a CSV file
     # csv_file_path = 'elevation_data_center_square.csv'
     # df.to_csv(csv_file_path, index=False, header=False)
-    json_file_path = 'ortho.json'
+    json_file_path = 'ohrc.json'
+    # save_grayscale_texture(data_list , 'textuorthuw')
     with open(json_file_path, 'w') as json_file:
         json.dump(data_list, json_file)
 
